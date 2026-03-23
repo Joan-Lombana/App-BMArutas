@@ -1,0 +1,7 @@
+{
+  "name": "appCiudadano",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

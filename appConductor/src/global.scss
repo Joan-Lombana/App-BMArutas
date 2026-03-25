@@ -35,3 +35,14 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* =========================================
+   TIPOGRAFÍAS PERSONALIZADAS
+   ========================================= */
+@font-face {
+  font-family: 'Rundale';
+  /* Ruta absoluta desde root para que Ionic encuentre los assets */
+  src: url('/assets/fonts/rundale-black.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}

@@ -1,0 +1,70 @@
+<ion-content [scrollY]="true" class="dashboard-content">
+
+  <!-- Pull to refresh para que el conductor actualice la ruta -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="header-section fade-in-down">
+    <div class="user-greeting">
+      <h2 class="greeting-text">Hola,</h2>
+      <h1 class="user-name">{{ conductorNombre }}</h1>
+    </div>
+    
+    <ion-button fill="clear" class="notification-btn">
+      <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
+      <div class="badge"></div>
+    </ion-button>
+  </div>
+
+  <div class="main-content">
+    
+    <!-- Tarjeta Principal de Ruta -->
+    <ion-card class="route-card fade-in-up" style="animation-delay: 0.1s">
+      <ion-card-content>
+        <div class="route-header">
+          <span class="status-badge">Turno Programado</span>
+          <span class="time">{{ horaInicio }}</span>
+        </div>
+        
+        <h2 class="route-name">{{ rutaAsignada }}</h2>
+        <p class="truck-info">Camión RE-024 • Capacidad: Vacía</p>
+
+        <!-- Botón Gigante de Acción -->
+        <ion-button expand="block" class="start-btn pulse-animation" (click)="iniciarRecorrido()">
+          <ion-icon name="play-circle-outline" slot="start"></ion-icon>
+          INICIAR RECORRIDO
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Acciones Rápidas Horizontalmente -->
+    <h3 class="section-title fade-in-up" style="animation-delay: 0.2s">Acciones de Operación</h3>
+    <div class="quick-actions fade-in-up" style="animation-delay: 0.3s">
+      
+      <div class="action-card">
+        <div class="icon-wrapper map-icon">
+          <ion-icon name="map-outline"></ion-icon>
+        </div>
+        <span>Ver Mapa</span>
+      </div>
+
+      <div class="action-card">
+        <div class="icon-wrapper alert-icon">
+          <ion-icon name="warning-outline"></ion-icon>
+        </div>
+        <span>Reportar</span>
+      </div>
+
+      <div class="action-card">
+        <div class="icon-wrapper chat-icon">
+          <ion-icon name="chatbubble-outline"></ion-icon>
+        </div>
+        <span>Soporte</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>

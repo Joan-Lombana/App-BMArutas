@@ -1,0 +1,21 @@
+<ion-content [scrollY]="false">
+  <div class="splash-container">
+
+    <!-- Logo y nombre animados -->
+    <div class="brand">
+      <div class="logo-icon animate-pop">
+        <ion-icon name="bus-outline"></ion-icon>
+      </div>
+      <h1 class="brand-name animate-fade">BMArutas</h1>
+      <p class="brand-sub animate-fade" style="animation-delay: 0.4s">Conductor</p>
+    </div>
+
+    <!-- Botón que aparece suavemente luego de la animación -->
+    <div class="bottom-action" [class.visible]="mostrarBoton">
+      <ion-button expand="block" class="start-btn" routerLink="/login">
+        Comenzar
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

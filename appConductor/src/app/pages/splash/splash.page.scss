@@ -1,0 +1,101 @@
+ion-content {
+  --background: #0a0f1a; // Matching the login background exactly
+}
+
+.splash-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+}
+
+/* Logo y Nombre centrados */
+.brand {
+  text-align: center;
+
+  .logo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 110px;
+    background: #34d399; // Verde Menta
+    border-radius: 32px;
+    margin-bottom: 28px;
+    box-shadow: 0 14px 35px rgba(52, 211, 153, 0.35);
+
+    ion-icon {
+      font-size: 56px;
+      color: #064e3b; // Verde muy oscuro para generar contraste
+    }
+  }
+
+  .brand-name {
+    font-family: 'Rundale', sans-serif; // Tipografía especial
+    font-size: 52px; // Más grande para destacar fuentes display
+    font-weight: normal;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 1px;
+  }
+
+  .brand-sub {
+    font-size: 15px;
+    font-weight: 500;
+    color: #34d399; // Verde menta
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+}
+
+/* Botón inferior que aparece suavemente */
+.bottom-action {
+  position: absolute;
+  bottom: 56px;
+  left: 28px;
+  right: 28px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .start-btn {
+    --background: #34d399; // Verde Menta
+    --background-activated: #10b981; // Verde más oscuro
+    --color: #064e3b; // Texto oscuro para mayor contraste
+    --border-radius: 30px; // Estilo pastilla igual al login
+    height: 60px;
+    font-size: 17px;
+    font-weight: 700;
+    --box-shadow: 0 8px 24px rgba(52, 211, 153, 0.35); // IMPORTANTE: usar variable de ionic para la sombra
+  }
+}
+
+/* Animaciones de entrada */
+@keyframes popIn {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pop {
+  animation: popIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-fade {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+  animation-delay: 0.5s;
+}

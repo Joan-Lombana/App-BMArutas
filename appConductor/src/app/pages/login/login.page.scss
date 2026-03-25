@@ -1,0 +1,118 @@
+ion-content {
+  --background: #0a0f1a; // Fondo negro profundo de la referencia
+}
+
+.login-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================
+   HERO CON IMAGEN (50% superior)
+   ========================================= */
+.hero-section {
+  position: relative;
+  flex: 1 1 50%; // Toma la mitad superior de la pantalla
+  min-height: 45vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; 
+
+  .hero-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  // Degradado suave y extendido
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(10, 15, 26, 0) 10%,
+      rgba(10, 15, 26, 0.4) 50%,
+      rgba(10, 15, 26, 0.85) 80%,
+      rgba(10, 15, 26, 1) 100%
+    );
+    z-index: 1;
+  }
+
+  // Título centrado en el límite de la imagen como en la referencia
+  .welcome-title {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #ffffff;
+    font-family: 'Rundale', sans-serif; // Añadida la fuente personalizada
+    font-size: 38px; // Ligeramente más grande para compensar el diseño
+    font-weight: normal; // Rundale luce mejor sin bold forzado
+    margin: 0 0 20px 0;
+    letter-spacing: 1px;
+  }
+}
+
+/* =========================================
+   FORMULARIO OSCURO EN LA MITAD INFERIOR
+   ========================================= */
+.form-card {
+  flex: 0 0 auto;
+  padding: 10px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #0a0f1a; // Fundido invisible con el overlay superior
+  z-index: 2;
+
+  .input-group {
+    .dark-input {
+      --background: rgba(255, 255, 255, 0.04); // Muy translúcido como en el ref
+      --border-radius: 20px;
+      border-radius: 20px;
+      --padding-start: 16px;
+      --inner-padding-end: 8px;
+      --color: #f1f5f9;
+      --placeholder-color: #64748b;
+      --min-height: 60px; // Inputs más altos para touch
+      border: 1px solid rgba(255, 255, 255, 0.1);
+
+      ion-icon[slot="start"] {
+        color: #94a3b8;
+        font-size: 22px;
+        margin-right: 12px;
+      }
+
+      .eye-btn {
+        --color: #94a3b8;
+        margin: 0;
+      }
+    }
+  }
+
+  // Botón principal redondeado estilo pastilla (verde menta)
+  .main-btn {
+    --background: #34d399; // Verde menta brillante
+    --background-activated: #10b981; // Verde más oscuro al presionar
+    --color: #064e3b; // Texto oscuro para contrastar con el fondo claro del botón
+    --border-radius: 30px; // Estilo pastilla
+    height: 60px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 16px;
+    --box-shadow: 0 8px 20px rgba(52, 211, 153, 0.25);
+  }
+
+  .help-text {
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 24px;
+    line-height: 1.5;
+  }
+}

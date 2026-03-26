@@ -4,46 +4,67 @@
     <!-- Imagen Hero arriba -->
     <div class="hero-section">
       <img src="assets/hero-login.png" alt="BMArutas" class="hero-img" />
-      <!-- Degradado sobre la imagen para transición suave al negro -->
       <div class="hero-overlay"></div>
       <h1 class="welcome-title">Bienvenido</h1>
     </div>
 
-    <!-- Formulario sobre fondo oscuro -->
+    <!-- Formulario -->
     <div class="form-card">
 
       <div class="input-group">
         <ion-item class="dark-input" lines="none">
           <ion-icon name="mail-outline" slot="start"></ion-icon>
-          <ion-input 
-            type="email" 
+
+          <ion-input
+            id="correoInput"
+            name="correo"
+            type="email"
             placeholder="Correo electrónico"
             [(ngModel)]="correo">
           </ion-input>
+
         </ion-item>
       </div>
 
       <div class="input-group">
         <ion-item class="dark-input" lines="none">
           <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-          <ion-input 
+
+          <ion-input
+            id="passwordInput"
+            name="password"
             [type]="verContrasena ? 'text' : 'password'"
             placeholder="Contraseña"
             [(ngModel)]="contrasena">
           </ion-input>
-          <ion-button fill="clear" slot="end" (click)="toggleContrasena()" class="eye-btn">
-            <ion-icon [name]="verContrasena ? 'eye-off-outline' : 'eye-outline'" slot="icon-only"></ion-icon>
+
+          <ion-button
+            fill="clear"
+            slot="end"
+            (click)="toggleContrasena()"
+            class="eye-btn">
+
+            <ion-icon
+              [name]="verContrasena ? 'eye-off-outline' : 'eye-outline'"
+              slot="icon-only">
+            </ion-icon>
+
           </ion-button>
+
         </ion-item>
       </div>
 
-      <!-- Botón principal -->
-      <ion-button expand="block" class="main-btn" (click)="iniciarSesion()" [disabled]="cargando">
+      <ion-button
+        expand="block"
+        class="main-btn"
+        (click)="iniciarSesion()"
+        [disabled]="cargando">
+
         <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
         <span *ngIf="!cargando">Continuar</span>
+
       </ion-button>
 
-      <!-- Texto de ayuda -->
       <p class="help-text">
         ¿Problemas al ingresar? Contacta a tu administrador.
       </p>

@@ -11,7 +11,8 @@ export class Auth {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/auth`;
 
-  currentUser = signal<any>(this.getUserFromStorage());
+  // 🔥 inicializa desde storage correctamente
+  currentUser = signal<any | null>(this.getUserFromStorage());
 
   // ============================
   // LOGIN
@@ -26,18 +27,22 @@ export class Auth {
 
       tap((res: any) => {
 
-        if (res.access_token) {
+        // ✅ Guardar token
+        if (res?.access_token) {
           localStorage.setItem('token', res.access_token);
         }
 
-        if (res.usuario) {
+        // ✅ Guardar usuario limpio
+        if (res?.usuario) {
+
+          const usuario = res.usuario;
 
           localStorage.setItem(
             'usuario',
-            JSON.stringify(res.usuario)
+            JSON.stringify(usuario)
           );
 
-          this.currentUser.set(res.usuario);
+          this.currentUser.set(usuario);
         }
 
       })
@@ -55,16 +60,18 @@ export class Auth {
   }
 
   // ============================
-  // USUARIO
+  // USUARIO (LOCAL STORAGE)
   // ============================
 
-  getUserFromStorage() {
+  private getUserFromStorage(): any | null {
 
-    const user = localStorage.getItem('usuario');
-
-    if (!user) return null;
-
-    return JSON.parse(user);
+    try {
+      const user = localStorage.getItem('usuario');
+      return user ? JSON.parse(user) : null;
+    } catch (error) {
+      console.error('Error leyendo usuario del storage', error);
+      return null;
+    }
 
   }
 
@@ -78,7 +85,7 @@ export class Auth {
 
     if (!user) return null;
 
-    return user.rol;
+    return user.rol ?? null;
 
   }
 
@@ -105,7 +112,7 @@ export class Auth {
 
     return {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token || ''}`
       })
     };
 

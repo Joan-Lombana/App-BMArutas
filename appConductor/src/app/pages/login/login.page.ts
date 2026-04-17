@@ -46,7 +46,6 @@ export class LoginPage implements OnInit {
 
   verContrasena = false;
   cargando = false;
-
   correo = '';
   contrasena = '';
 
@@ -83,11 +82,11 @@ export class LoginPage implements OnInit {
       this.contrasena
     ).subscribe({
 
-      next: () => {
+      next: (res: any) => {
 
         this.cargando = false;
 
-        const rol = this.auth.getRol();
+        const rol = res.usuario?.rol;
 
         console.log('ROL:', rol);
 

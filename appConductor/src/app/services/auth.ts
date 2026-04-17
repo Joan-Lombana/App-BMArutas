@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of} from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -34,12 +34,8 @@ export class Auth {
 
         // ✅ Guardar usuario limpio
         if (res?.usuario) {
-
           const usuario = res.usuario;
-
-          localStorage.setItem(
-            'usuario',
-            JSON.stringify(usuario)
+          localStorage.setItem('usuario',JSON.stringify(usuario)
           );
 
           this.currentUser.set(usuario);
@@ -79,13 +75,26 @@ export class Auth {
   // ROL
   // ============================
 
-  getRol(): string | null {
+  getProfile(): Observable<any> {
 
-    const user = this.currentUser();
+    const token = this.getToken();
 
-    if (!user) return null;
+    if (!token) {
+      return of(null);
+    }
 
-    return user.rol ?? null;
+    return this.http.get(`${this.apiUrl}/profile`, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      })
+    }).pipe(
+
+      tap((user: any) => {
+        this.currentUser.set(user);
+        localStorage.setItem('usuario', JSON.stringify(user));
+      })
+
+    );
 
   }
 

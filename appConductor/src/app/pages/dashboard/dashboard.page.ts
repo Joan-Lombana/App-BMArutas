@@ -6,6 +6,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, playCircleOutline } from 'ionicons/icons';
+import { Auth } from '../../services/auth';
+import { inject, effect } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +18,9 @@ import { notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, pl
 })
 export class DashboardPage implements OnInit {
 
-  conductorNombre = 'Roberto';
+  private auth = inject(Auth);
+
+  usuarioNombre = '';
   rutaAsignada = 'Ruta 4 - Centro Norte';
   horaInicio = '06:00 AM';
 
@@ -24,7 +28,19 @@ export class DashboardPage implements OnInit {
     addIcons({ notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, playCircleOutline });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+
+    const user = this.auth.currentUser();
+    if (!user) {
+      this.auth.getProfile().subscribe({
+        next: (user) => {
+          this.usuarioNombre = user?.primerNombre || 'Conductor';
+        }
+      });
+    } else {
+      this.usuarioNombre = user.primerNombre;
+    }
+  }
 
   iniciarRecorrido() {
     console.log("Iniciando recorrido para", this.rutaAsignada);

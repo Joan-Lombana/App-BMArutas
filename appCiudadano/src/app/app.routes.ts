@@ -3,6 +3,15 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./tabs/tabs.routes').then((m) => m.routes),
+    redirectTo: 'splash',
+    pathMatch: 'full',
+  },
+  {
+    path: 'splash',
+    loadComponent: () => import('./pages/splash/splash.page').then( m => m.SplashPage)
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./pages/onboarding/onboarding.page').then( m => m.OnboardingPage)
   },
 ];

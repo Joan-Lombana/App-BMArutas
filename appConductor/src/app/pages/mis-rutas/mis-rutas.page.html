@@ -1,0 +1,125 @@
+<ion-content [scrollY]="true" class="mis-rutas-content">
+  <div class="wrapper fade-in-down">
+
+    <!-- HEADER -->
+    <div class="top-nav">
+      <div class="brand-info">
+        <!-- TODO: Reemplazar URL por foto real del conductor desde el backend -->
+        <div class="avatar-placeholder">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="brand-text">
+          <span class="app-name">BMArutas</span>
+          <!-- Indicador de modo offline -->
+          <div class="offline-badge">
+            <ion-icon name="cloud-offline-outline"></ion-icon>
+            <span>OFFLINE</span>
+          </div>
+        </div>
+      </div>
+      <ion-icon name="notifications-outline" class="notif-icon"></ion-icon>
+    </div>
+
+    <!-- TÍTULO Y FECHA -->
+    <div class="title-section">
+      <h1>Rutas Asignadas</h1>
+      <!-- TODO: fecha dinámica desde el sistema -->
+      <p class="fecha">{{ fechaHoy }}</p>
+    </div>
+
+    <!-- ESTADO VACÍO (cuando aún no hay datos del backend) -->
+    <div class="empty-state" *ngIf="rutas.length === 0">
+      <div class="empty-icon">
+        <ion-icon name="map-outline"></ion-icon>
+      </div>
+      <p class="empty-title">Sin rutas asignadas</p>
+      <p class="empty-sub">Las rutas asignadas por el administrador aparecerán aquí.</p>
+    </div>
+
+    <!-- LISTA DE RUTAS (se muestra cuando el backend devuelva datos) -->
+    <div class="rutas-list" *ngIf="rutas.length > 0">
+      <div
+        class="ruta-card"
+        [class]="'ruta-card--' + ruta.estado"
+        *ngFor="let ruta of rutas"
+        (click)="verRuta(ruta)"
+      >
+        <!-- Fila superior: código + estado -->
+        <div class="card-top-row">
+          <div class="card-codigo-group">
+            <span class="label-small">CÓDIGO</span>
+            <!-- TODO: viene del backend → ruta.codigo -->
+            <span class="codigo">{{ ruta.codigo }}</span>
+          </div>
+          <div class="estado-badge" [class]="'badge--' + ruta.estado">
+            <span *ngIf="ruta.estado === 'activa'" class="dot-green"></span>
+            {{ getEstadoLabel(ruta.estado) }}
+          </div>
+        </div>
+
+        <!-- Zona de operación -->
+        <span class="label-small mt-4">ZONA DE OPERACIÓN</span>
+        <!-- TODO: viene del backend → ruta.zona -->
+        <p class="zona-nombre">{{ ruta.zona }}</p>
+
+        <!-- Horario + Acción -->
+        <div class="card-bottom-row">
+          <div class="horario">
+            <ion-icon name="time-outline"></ion-icon>
+            <!-- TODO: viene del backend → ruta.horarioInicio y ruta.horarioFin -->
+            <span>{{ ruta.horarioInicio }} - {{ ruta.horarioFin }}</span>
+          </div>
+
+          <!-- Botón continuar si está activa -->
+          <button
+            class="btn-continuar"
+            *ngIf="ruta.estado === 'activa'"
+            (click)="$event.stopPropagation(); continuarRuta(ruta)"
+            routerLink="/tabs/manifest"
+          >
+            CONTINUAR
+          </button>
+
+          <!-- Flecha si está asignada -->
+          <ion-icon
+            name="chevron-forward-outline"
+            class="arrow-icon"
+            *ngIf="ruta.estado === 'asignada'"
+          ></ion-icon>
+
+          <!-- Check si está finalizada -->
+          <ion-icon
+            name="checkmark-circle"
+            class="check-icon"
+            *ngIf="ruta.estado === 'finalizada'"
+          ></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUMEN DE JORNADA (cuando backend devuelva datos) -->
+    <div class="jornada-card" *ngIf="resumenJornada">
+      <div class="jornada-header">
+        <span>ESTADO DE JORNADA</span>
+        <!-- TODO: viene del backend → resumenJornada.porcentajeCompletado -->
+        <span class="pct">{{ resumenJornada.porcentajeCompletado }}% COMPLETADO</span>
+      </div>
+      <div class="jornada-bar">
+        <div class="jornada-fill" [style.width]="resumenJornada.porcentajeCompletado + '%'"></div>
+      </div>
+      <div class="jornada-stats">
+        <div class="stat">
+          <span class="label-small">KMS RECORRIDOS</span>
+          <!-- TODO: viene del backend → resumenJornada.kmsRecorridos -->
+          <span class="stat-val">{{ resumenJornada.kmsRecorridos }}</span>
+        </div>
+        <div class="stat">
+          <span class="label-small">PUNTOS RESTANTES</span>
+          <!-- TODO: viene del backend → resumenJornada.puntosRestantes -->
+          <span class="stat-val highlight">{{ resumenJornada.puntosRestantes }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

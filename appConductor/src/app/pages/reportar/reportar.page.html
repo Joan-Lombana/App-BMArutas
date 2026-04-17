@@ -1,0 +1,74 @@
+<ion-content class="dark-report">
+  <!-- FLOTANTE SUPERIOR -->
+  <div class="floating-header">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/ruta" color="success"></ion-back-button>
+    </ion-buttons>
+    <div class="header-titles">
+      <h2>Report Incident</h2>
+    </div>
+  </div>
+
+  <div class="report-container">
+    <span class="section-label">SELECCIONE TIPO DE INCIDENCIA</span>
+    
+    <div class="incident-grid">
+      <div class="incident-card" [class.selected]="tipoIncidencia === 'Mechanic'" (click)="seleccionarTipo('Mechanic')">
+        <div class="icon-circle warning-bg">
+          <ion-icon name="construct-outline"></ion-icon>
+        </div>
+        <span>Falla Mecánica</span>
+      </div>
+
+      <div class="incident-card" [class.selected]="tipoIncidencia === 'Blocked'" (click)="seleccionarTipo('Blocked')">
+        <div class="icon-circle danger-bg">
+          <ion-icon name="ban-outline"></ion-icon>
+        </div>
+        <span>Vía Obstruida</span>
+      </div>
+
+      <div class="incident-card" [class.selected]="tipoIncidencia === 'Access'" (click)="seleccionarTipo('Access')">
+        <div class="icon-circle success-bg">
+          <ion-icon name="map-outline"></ion-icon>
+        </div>
+        <span>Zona Inaccesible</span>
+      </div>
+
+      <div class="incident-card" [class.selected]="tipoIncidencia === 'Accident'" (click)="seleccionarTipo('Accident')">
+        <div class="icon-circle success-bg">
+          <ion-icon name="car-outline"></ion-icon>
+        </div>
+        <span>Accidente</span>
+      </div>
+    </div>
+
+    <!-- Otro -->
+    <div class="incident-card other-card" (click)="seleccionarTipo('Otro')">
+      <div class="icon-circle gray-bg">
+        <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
+      </div>
+      <span style="flex: 1; text-align: left; padding-left: 12px; font-weight: 600;">Otro</span>
+      <ion-icon name="chevron-forward-outline" style="color: #94a3b8; font-size: 20px;"></ion-icon>
+    </div>
+
+    <span class="section-label mt-4">EVIDENCIA FOTOGRÁFICA</span>
+    
+    <div class="photo-capture-area">
+      <div class="camera-btn pulse-animation">
+        <ion-icon name="camera-outline"></ion-icon>
+        <span>Tomar Foto</span>
+      </div>
+    </div>
+
+    <span class="section-label mt-4">DESCRIPCIÓN BREVE</span>
+    <div class="textarea-wrapper">
+      <textarea placeholder="Detalla lo sucedido aquí..."></textarea>
+    </div>
+
+    <ion-button class="submit-btn" expand="block" (click)="enviarReporte()">
+      <ion-icon name="send-outline" slot="start"></ion-icon>
+      ENVIAR REPORTE
+    </ion-button>
+
+  </div>
+</ion-content>

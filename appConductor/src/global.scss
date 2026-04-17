@@ -41,8 +41,87 @@
    ========================================= */
 @font-face {
   font-family: 'Rundale';
-  /* Ruta absoluta desde root para que Ionic encuentre los assets */
   src: url('/assets/fonts/rundale-black.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
+
+/* =========================================
+   TAB BAR FLOTANTE - ESTILO BMArutas
+   Debe estar en global.scss para penetrar
+   el Shadow DOM de los componentes Ionic
+   ========================================= */
+
+/* Contenedor de la barra - píldora flotante */
+ion-tab-bar.floating-pill-tabs {
+  --background: #141d26;
+  --border: none;
+  background: #141d26 !important;
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 20px;
+  width: auto;
+  height: 62px;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 0 8px;
+}
+
+/* Cada botón de pestaña */
+ion-tab-bar.floating-pill-tabs ion-tab-button {
+  --background: transparent;
+  --background-focused: transparent;
+  --background-focused-opacity: 0;
+  --color: #475569;
+  --color-selected: #2ecc71;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  border-radius: 24px;
+  height: 46px;
+  margin: 0 2px;
+  transition: all 0.2s ease;
+  max-width: none;
+  flex: 1;
+}
+
+/* Ícono */
+ion-tab-bar.floating-pill-tabs ion-tab-button ion-icon {
+  font-size: 20px;
+  margin-bottom: 3px;
+}
+
+/* Label debajo del ícono */
+ion-tab-bar.floating-pill-tabs ion-tab-button ion-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Pestaña SELECCIONADA */
+ion-tab-bar.floating-pill-tabs ion-tab-button.tab-selected {
+  --color: #2ecc71;
+  background: rgba(46, 204, 113, 0.1) !important;
+  border-radius: 24px;
+}
+
+/* =========================================
+   SAFE AREA — evita contenido cortado arriba
+   en dispositivos con notch y en el lab
+   ========================================= */
+
+/* Espacio inferior para que el contenido
+   no quede tapado por la barra flotante */
+ion-content {
+  --padding-bottom: 100px;
+}
+
+/* Excepción: la página del mapa no necesita
+   ese padding porque usa position: fixed */
+app-mi-ruta ion-content {
+  --padding-bottom: 0 !important;
+}
+
+

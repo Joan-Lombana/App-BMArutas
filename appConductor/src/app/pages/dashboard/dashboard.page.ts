@@ -25,7 +25,7 @@ export class DashboardPage implements OnInit {
   horaInicio = '06:00 AM';
 
   constructor() {
-    addIcons({ notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, playCircleOutline });
+    addIcons({ notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, playCircleOutline});
   }
 
   ngOnInit() {

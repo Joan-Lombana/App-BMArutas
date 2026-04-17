@@ -1,0 +1,69 @@
+<ion-content [fullscreen]="true" [scrollY]="false" class="dark-map-content">
+  <!-- FLOTANTE SUPERIOR STITCH -->
+  <div class="floating-header stitch-header">
+    <div class="brand">
+      <ion-icon name="bus-outline"></ion-icon>
+      BMArutas
+    </div>
+    <div class="timer-pill">
+      <ion-icon name="timer-outline"></ion-icon>
+      <span>01:24:36</span>
+    </div>
+  </div>
+
+  <!-- MAPA LEAFLET -->
+  <div class="map-wrapper" #mapContainer></div>
+
+  <!-- BOTÓN FLOTANTE UBICACIÓN (FAB) -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="location-fab">
+    <ion-fab-button class="glass-fab" (click)="centerOnUser()">
+      <ion-icon name="locate"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- BOTTOM SHEET STITCH -->
+  <div class="bottom-sheet stitch-sheet">
+    <div class="sheet-handle"></div>
+    
+    <div class="progress-section">
+      <span class="label">PROGRESO TOTAL</span>
+      <div class="flex-row">
+        <h1 class="percent">{{ progresoPorcentaje }}%</h1>
+        <span class="stops">14 / 40 Paradas</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" [style.width]="progresoPorcentaje + '%'"></div>
+      </div>
+    </div>
+
+    <!-- Próxima Parada Box -->
+    <div class="next-stop-stitch">
+      <div class="loc-icon">
+        <ion-icon name="location"></ion-icon>
+      </div>
+      <div class="ns-info">
+        <span class="label">PRÓXIMA PARADA</span>
+        <h3>Cra 15 #...</h3>
+        <p>Barrio San José</p>
+      </div>
+      <div class="distance-metric">
+        200m
+      </div>
+    </div>
+
+    <!-- Botones Accion -->
+    <div class="actions-row-stitch">
+      <button class="btn-check" (click)="registrarParada()">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        REGISTRAR PARADA
+      </button>
+
+      <button class="btn-pause" (click)="pausarRecorrido()">
+        <ion-icon name="pause-circle"></ion-icon>
+        PAUSAR RECORRIDO
+      </button>
+    </div>
+
+  </div>
+</ion-content>
+

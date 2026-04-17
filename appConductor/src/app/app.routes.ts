@@ -25,21 +25,44 @@ export const routes: Routes = [
         .then(m => m.LoginPage)
   },
 
-  // ✅ SOLO USUARIOS AUTENTICADOS
-  // ✅ ADMIN y CONDUCTOR
+  // ✅ TABS — requiere autenticación
+  {
+    path: 'tabs',
+    loadComponent: () => import('./pages/tabs/tabs.page').then(m => m.TabsPage),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'conductor'] },
+    children: [
+      {
+        path: 'ruta',
+        loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+      },
+      {
+        path: 'mis-rutas',
+        loadComponent: () => import('./pages/mis-rutas/mis-rutas.page').then(m => m.MisRutasPage)
+      },
+      {
+        path: 'manifest',
+        loadComponent: () => import('./pages/mi-ruta/mi-ruta.page').then(m => m.MiRutaPage)
+      },
+      {
+        path: '',
+        redirectTo: '/tabs/ruta',
+        pathMatch: 'full'
+      }
+    ]
+  },
 
+  // Redirección legacy del dashboard directo
   {
     path: 'dashboard',
+    redirectTo: '/tabs/ruta',
+    pathMatch: 'full'
+  },
 
-    canActivate: [authGuard, roleGuard],
-
-    data: {
-      roles: ['admin', 'conductor']
-    },
-
-    loadComponent: () =>
-      import('./pages/dashboard/dashboard.page')
-        .then(m => m.DashboardPage)
+  // Reportar incidencia
+  {
+    path: 'reportar',
+    loadComponent: () => import('./pages/reportar/reportar.page').then(m => m.ReportarPage)
   },
 
   // Fallback

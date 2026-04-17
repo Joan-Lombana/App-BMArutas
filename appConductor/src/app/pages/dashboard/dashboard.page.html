@@ -1,4 +1,15 @@
 <ion-content [scrollY]="true" class="dashboard-content">
+  <div class="main-wrapper fade-in-down">
+    
+    <!-- HEADER STITCH: Logo left, Avatar right -->
+    <div class="top-nav">
+      <div class="brand">
+        <ion-icon name="bus-outline"></ion-icon>
+        <span>BMArutas</span>
+      </div>
+      <div class="avatar">
+        <img src="https://i.pravatar.cc/100?img=11" alt="Roberto" />
+      </div>
 
   <!-- Pull to refresh para que el conductor actualice la ruta -->
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
@@ -10,61 +21,86 @@
       <h2 class="greeting-text">Hola,</h2>
       <h1 class="user-name">{{ usuarioNombre }}</h1>
     </div>
-    
-    <ion-button fill="clear" class="notification-btn">
-      <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
-      <div class="badge"></div>
-    </ion-button>
-  </div>
 
-  <div class="main-content">
-    
-    <!-- Tarjeta Principal de Ruta -->
-    <ion-card class="route-card fade-in-up" style="animation-delay: 0.1s">
-      <ion-card-content>
-        <div class="route-header">
-          <span class="status-badge">Turno Programado</span>
-          <span class="time">{{ horaInicio }}</span>
-        </div>
-        
-        <h2 class="route-name">{{ rutaAsignada }}</h2>
-        <p class="truck-info">Camión RE-024 • Capacidad: Vacía</p>
+    <!-- GREETING -->
+    <div class="greeting-sec">
+      <p class="subtitle">BIENVENIDO DE NUEVO</p>
+      <h1 class="title">Hola, {{ conductorNombre }}</h1>
+    </div>
 
-        <!-- Botón Gigante de Acción -->
-        <ion-button expand="block" class="start-btn pulse-animation" (click)="iniciarRecorrido()">
-          <ion-icon name="play-circle-outline" slot="start"></ion-icon>
-          INICIAR RECORRIDO
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Acciones Rápidas Horizontalmente -->
-    <h3 class="section-title fade-in-up" style="animation-delay: 0.2s">Acciones de Operación</h3>
-    <div class="quick-actions fade-in-up" style="animation-delay: 0.3s">
-      
-      <div class="action-card">
-        <div class="icon-wrapper map-icon">
-          <ion-icon name="map-outline"></ion-icon>
-        </div>
-        <span>Ver Mapa</span>
+    <!-- MAIN ROUTE CARD -->
+    <div class="route-card-stitch fade-in-up" style="animation-delay: 0.1s">
+      <div class="status-pill status-wait">EN ESPERA</div>
+      <h2 class="route-title">{{ rutaAsignada }}</h2>
+      <div class="truck-row">
+        <ion-icon name="car-sport-outline"></ion-icon>
+        <span>Camión RE-024</span>
       </div>
 
-      <div class="action-card">
-        <div class="icon-wrapper alert-icon">
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="label">PARADAS</span>
+          <span class="val">12 puntos</span>
+        </div>
+        <div class="stat-box">
+          <span class="label">ESTIMADO</span>
+          <span class="val">4h 20m</span>
+        </div>
+      </div>
+
+      <ion-button expand="block" class="stitch-play-btn" routerLink="/tabs/manifest">
+        <ion-icon name="play-sharp" slot="start"></ion-icon>
+        INICIAR RECORRIDO
+      </ion-button>
+    </div>
+
+    <!-- ACCESOS RÁPIDOS -->
+    <h3 class="section-title fade-in-up" style="animation-delay: 0.2s">ACCESOS RÁPIDOS</h3>
+    <div class="quick-grid fade-in-up" style="animation-delay: 0.3s">
+      <div class="action-btn">
+        <div class="icon-bulb icon-orange">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <span>HISTORIAL</span>
+      </div>
+      <div class="action-btn" routerLink="/reportar">
+        <div class="icon-bulb icon-red">
           <ion-icon name="warning-outline"></ion-icon>
         </div>
-        <span>Reportar</span>
+        <span>REPORTAR</span>
       </div>
-
-      <div class="action-card">
-        <div class="icon-wrapper chat-icon">
-          <ion-icon name="chatbubble-outline"></ion-icon>
+      <div class="action-btn">
+        <div class="icon-bulb icon-green">
+          <ion-icon name="headset-outline"></ion-icon>
         </div>
-        <span>Soporte</span>
+        <span>SOPORTE</span>
       </div>
+    </div>
 
+    <!-- META SEMANAL -->
+    <div class="goal-card fade-in-up" style="animation-delay: 0.4s">
+      <div class="circular-progress">
+        <svg viewBox="0 0 36 36" class="circular-chart green">
+          <path class="circle-bg"
+            d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <path class="circle"
+            stroke-dasharray="75, 100"
+            d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <text x="18" y="20.35" class="percentage">75%</text>
+        </svg>
+      </div>
+      <div class="goal-info">
+        <span class="label">META SEMANAL</span>
+        <span class="val">18/24 Rutas</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="forward-icon"></ion-icon>
     </div>
 
   </div>
-
 </ion-content>

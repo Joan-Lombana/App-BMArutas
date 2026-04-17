@@ -1,0 +1,232 @@
+.dark-map-content {
+  --background: #000000;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  position: relative;
+}
+
+/* El mapa ocupa TODO el viewport (fixed para saltar fuera del contenedor de tabs) */
+.map-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+
+/* OVERRIDES LEAFLET Z-INDEX */
+::ng-deep .leaflet-pane {
+  z-index: 2 !important;
+}
+::ng-deep .leaflet-top,
+::ng-deep .leaflet-bottom {
+  z-index: 5 !important;
+}
+
+/* CABECERA FLOTANTE — fixed para que siempre esté sobre el mapa */
+.floating-header.stitch-header {
+  position: fixed;
+  top: max(env(safe-area-inset-top), 16px);
+  left: 16px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0d131a;
+  border-radius: 28px;
+  padding: 12px 12px 12px 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2ecc71;
+    font-weight: 800;
+    font-size: 16px;
+
+    ion-icon { font-size: 20px; }
+  }
+
+  .timer-pill {
+    background: #141d26;
+    padding: 10px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #f1f5f9;
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 15px;
+
+    ion-icon { color: #2ecc71; }
+  }
+}
+
+/* FAB BOTÓN UBICACIÓN — fixed sobre el mapa */
+.location-fab {
+  position: fixed !important;
+  bottom: 330px;
+  right: 16px;
+  z-index: 20;
+
+  .glass-fab {
+    --background: #141d26;
+    --color: #f1f5f9;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* BOTTOM SHEET — fixed en la parte baja del viewport */
+.bottom-sheet.stitch-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #0d131a;
+  border-radius: 36px 36px 0 0;
+  padding: 16px 24px calc(16px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+
+  .sheet-handle {
+    width: 48px;
+    height: 4px;
+    background: #1e293b;
+    border-radius: 4px;
+    margin: 0 auto 20px;
+  }
+
+  .progress-section {
+    margin-bottom: 20px;
+
+    .label {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 4px 0 12px 0;
+
+      .percent {
+        margin: 0;
+        font-size: 32px;
+        color: #2ecc71;
+        font-weight: 800;
+      }
+      .stops {
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+      }
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+
+      .progress-bar-fill {
+        background: #2ecc71;
+        border-radius: 4px;
+        height: 100%;
+      }
+    }
+  }
+
+  .next-stop-stitch {
+    background: #141d26;
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .loc-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(46, 204, 113, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      ion-icon { color: #2ecc71; font-size: 22px; }
+    }
+
+    .ns-info {
+      flex: 1;
+      .label {
+        font-size: 10px;
+        color: #f59e0b;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      h3 {
+        margin: 2px 0 1px 0;
+        color: #f1f5f9;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      p {
+        margin: 0;
+        color: #64748b;
+        font-size: 12px;
+      }
+    }
+
+    .distance-metric {
+      color: #2ecc71;
+      font-size: 16px;
+      font-weight: 800;
+    }
+  }
+
+  .actions-row-stitch {
+    display: flex;
+    gap: 12px;
+
+    button {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+
+      ion-icon { font-size: 18px; }
+
+      &.btn-check {
+        background: linear-gradient(135deg, #2ecc71, #10b981);
+        color: #0d131a;
+        box-shadow: 0 6px 16px rgba(46, 204, 113, 0.2);
+      }
+
+      &.btn-pause {
+        background: #141d26;
+        color: #f1f5f9;
+
+        ion-icon { color: #94a3b8; }
+      }
+    }
+  }
+}

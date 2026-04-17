@@ -1,2 +1,27 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+// =========================================
+// TIPOGRAFÍA GLOBAL — Space Mono
+// Aplica la fuente técnica/operativa a toda
+// la app mediante la variable de Ionic
+// =========================================
+:root {
+  --ion-font-family: 'Space Mono', monospace;
+  --ion-background-color: #0d131a;
+  --ion-text-color: #f1f5f9;
+}
+
+// Aplicar también directamente al body y a ion-app
+// para garantizar cobertura total
+body,
+ion-app,
+ion-content,
+ion-label,
+ion-button,
+ion-title,
+ion-input,
+ion-textarea,
+ion-item {
+  font-family: 'Space Mono', monospace !important;
+}

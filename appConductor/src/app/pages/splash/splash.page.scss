@@ -1,5 +1,6 @@
+// Trigger Live Reload
 ion-content {
-  --background: #0a0f1a; // Matching the login background exactly
+  --background: #0a0f24; // Matching the login background exactly
 }
 
 .splash-container {
@@ -25,7 +26,7 @@ ion-content {
     border-radius: 32px;
     margin-bottom: 28px;
     /* Borde tenue para que se vea el espacio reservado en desarrollo */
-    border: 2px dashed rgba(52, 211, 153, 0.2);
+    border: 2px dashed rgba(0, 229, 255, 0.2);
   }
 
   /* Estilo listo para la imagen cuando llegue */
@@ -51,7 +52,7 @@ ion-content {
     font-family: 'Space Mono', monospace;
     font-size: 13px;
     font-weight: 400;
-    color: #34d399;
+    color: #00E5FF;
     letter-spacing: 6px;
     text-transform: uppercase;
     margin-top: 10px;
@@ -74,14 +75,14 @@ ion-content {
   }
 
   .start-btn {
-    --background: #34d399; // Verde Menta
-    --background-activated: #10b981; // Verde más oscuro
-    --color: #064e3b; // Texto oscuro para mayor contraste
+    --background: #00E5FF; // Electric Cyan
+    --background-activated: #0ea5e9; // Electric Blue oscuro
+    --color: #0a0f24; // Texto oscuro para mayor contraste
     --border-radius: 30px; // Estilo pastilla igual al login
     height: 60px;
     font-size: 17px;
     font-weight: 700;
-    --box-shadow: 0 8px 24px rgba(52, 211, 153, 0.35); // IMPORTANTE: usar variable de ionic para la sombra
+    --box-shadow: 0 8px 24px rgba(0, 229, 255, 0.35); // IMPORTANTE: usar variable de ionic para la sombra
   }
 }
 

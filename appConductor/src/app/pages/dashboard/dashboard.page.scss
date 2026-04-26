@@ -1,9 +1,9 @@
 .dashboard-content {
-  --background: #0d131a;
+  --background: #0a0f24;
 }
 
 .main-wrapper {
-  padding: env(safe-area-inset-top, 20px) 24px 80px;
+  padding: env(safe-area-inset-top, 20px) 24px 140px;
   display: flex;
   flex-direction: column;
 }
@@ -18,7 +18,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #2ecc71;
+    color: #00E5FF;
     font-weight: 800;
     font-size: 18px;
     letter-spacing: -0.5px;
@@ -26,19 +26,43 @@
     ion-icon {
       font-size: 24px;
     }
+
+    .offline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(100, 116, 139, 0.15);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-top: 4px;
+      
+      ion-icon {
+        font-size: 10px;
+        color: #94a3b8;
+      }
+      
+      span {
+        font-size: 9px;
+        font-weight: 800;
+        color: #94a3b8;
+        letter-spacing: 1px;
+      }
+    }
   }
 
   .avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid rgba(46, 204, 113, 0.3);
-    
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    border: 2px solid rgba(0, 229, 255, 0.3);
+    background: #111833;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 20px;
+      color: rgba(0, 229, 255, 0.5);
     }
   }
 }
@@ -63,8 +87,25 @@
   }
 }
 
+.user-greeting {
+  margin-bottom: 24px;
+
+  .greeting-text {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: #f1f5f9;
+    letter-spacing: -0.5px;
+
+    .user-name {
+      color: #00E5FF;
+      font-weight: 800;
+    }
+  }
+}
+
 .route-card-stitch {
-  background: #141d26;
+  background: #111833;
   border-radius: 28px;
   padding: 24px;
   margin-bottom: 32px;
@@ -80,8 +121,8 @@
     margin-bottom: 16px;
     
     &.status-wait {
-      background: rgba(46, 204, 113, 0.15);
-      color: #2ecc71;
+      background: rgba(0, 229, 255, 0.15);
+      color: #00E5FF;
     }
   }
 
@@ -103,7 +144,7 @@
     margin-bottom: 24px;
     
     ion-icon {
-      color: #2ecc71;
+      color: #00E5FF;
     }
   }
 
@@ -136,15 +177,15 @@
   }
 
   .stitch-play-btn {
-    --background: #2ecc71;
-    --color: #0d131a;
+    --background: #00E5FF;
+    --color: #0a0f24;
     --border-radius: 24px;
     font-weight: 800;
     font-size: 15px;
     height: 56px;
     letter-spacing: 0.5px;
     margin: 0;
-    --box-shadow: 0 8px 16px rgba(46, 204, 113, 0.2);
+    --box-shadow: 0 8px 16px rgba(0, 229, 255, 0.2);
   }
 }
 
@@ -163,7 +204,7 @@
 
   .action-btn {
     flex: 1;
-    background: #141d26;
+    background: #111833;
     border-radius: 20px;
     padding: 20px 0;
     display: flex;
@@ -183,7 +224,7 @@
 
       &.icon-orange { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
       &.icon-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-      &.icon-green { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+      &.icon-green { background: rgba(0, 229, 255, 0.15); color: #00E5FF; }
     }
 
     span {
@@ -200,7 +241,7 @@
 }
 
 .goal-card {
-  background: #141d26;
+  background: #111833;
   border-radius: 24px;
   padding: 20px;
   display: flex;
@@ -233,11 +274,11 @@
     }
 
     .green .circle {
-      stroke: #2ecc71;
+      stroke: #00E5FF;
     }
 
     .percentage {
-      fill: #2ecc71;
+      fill: #00E5FF;
       font-family: inherit;
       font-weight: 700;
       font-size: 10px;
@@ -272,6 +313,11 @@
 
 @keyframes progress {
   0% { stroke-dasharray: 0 100; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Utils animations */

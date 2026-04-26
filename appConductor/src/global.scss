@@ -36,14 +36,10 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
 
-/* =========================================
-   TIPOGRAFÍAS PERSONALIZADAS
-   ========================================= */
-@font-face {
-  font-family: 'Rundale';
-  src: url('/assets/fonts/rundale-black.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+  --ion-font-family: 'Space Mono', monospace;
 }
 
 /* =========================================
@@ -54,9 +50,9 @@
 
 /* Contenedor de la barra - píldora flotante */
 ion-tab-bar.floating-pill-tabs {
-  --background: #141d26;
+  --background: #111833;
   --border: none;
-  background: #141d26 !important;
+  background: #111833 !important;
   position: absolute;
   bottom: 16px;
   left: 20px;
@@ -75,7 +71,7 @@ ion-tab-bar.floating-pill-tabs ion-tab-button {
   --background-focused: transparent;
   --background-focused-opacity: 0;
   --color: #475569;
-  --color-selected: #2ecc71;
+  --color-selected: #00E5FF;
   --padding-top: 0;
   --padding-bottom: 0;
   border-radius: 24px;
@@ -84,6 +80,10 @@ ion-tab-bar.floating-pill-tabs ion-tab-button {
   transition: all 0.2s ease;
   max-width: none;
   flex: 1;
+
+  &::part(indicator) {
+    display: none;
+  }
 }
 
 /* Ícono */
@@ -102,8 +102,8 @@ ion-tab-bar.floating-pill-tabs ion-tab-button ion-label {
 
 /* Pestaña SELECCIONADA */
 ion-tab-bar.floating-pill-tabs ion-tab-button.tab-selected {
-  --color: #2ecc71;
-  background: rgba(46, 204, 113, 0.1) !important;
+  --color: #00E5FF;
+  background: rgba(0, 229, 255, 0.1) !important;
   border-radius: 24px;
 }
 

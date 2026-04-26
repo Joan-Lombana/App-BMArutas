@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline } from 'ionicons/icons';
+import { timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline, mapOutline } from 'ionicons/icons';
+import { RutaService } from '../../services/ruta.service';
+import { OfflineService } from '../../services/offline.service';
 
 // Estructura de datos que vendrá del backend
 export interface Ruta {
@@ -37,19 +39,56 @@ export class MisRutasPage implements OnInit {
   // Fecha de hoy formateada
   fechaHoy: string = '';
 
-  // TODO: Reemplazar con llamada real → GET /api/rutas?conductorId={id}&fecha={hoy}
-  // Solo se deben recibir las rutas del conductor autenticado (filtrado en backend)
-  rutas: Ruta[] = [];
-
-  // TODO: Reemplazar con llamada real → GET /api/jornada?conductorId={id}&fecha={hoy}
-  resumenJornada: ResumenJornada | null = null;
+  // Estructura de la ruta a mostrar
+  rutas: any[] = [];
+  cargando = true;
+  resumenJornada: any = null; // Por ahora sin datos del backend
+  private rutaService = inject(RutaService);
+  public offlineService = inject(OfflineService); // ✅ Accesible desde el HTML
 
   constructor() {
-    addIcons({ timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline });
+    addIcons({ timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline, mapOutline });
   }
 
   ngOnInit() {
     this.setFechaHoy();
+    this.cargarRutaAsignada();
+  }
+
+  cargarRutaAsignada() {
+    this.cargando = true;
+    this.rutaService.obtenerRecorridoAsignado().subscribe({
+      next: (resultado) => {
+        if (resultado) {
+          const { recorrido, ruta } = resultado;
+          this.rutas = [{
+            codigo: ruta?.nombre_ruta || 'Sin código',
+            zona: 'Buenaventura',
+            horarioInicio: '06:00',
+            horarioFin: '14:00',
+            estado: this.mapearEstado(recorrido?.estado),
+            _ruta: ruta,
+            _recorrido: recorrido
+          }];
+        } else {
+          this.rutas = [];
+        }
+        this.cargando = false;
+      },
+      error: () => {
+        this.rutas = [];
+        this.cargando = false;
+      }
+    });
+  }
+
+  mapearEstado(estadoBackend: string): string {
+    switch (estadoBackend) {
+      case 'Activa': return 'activa';
+      case 'Programada': return 'asignada';
+      case 'Finalizado': return 'finalizada';
+      default: return 'asignada';
+    }
   }
 
   setFechaHoy() {

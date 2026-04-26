@@ -5,11 +5,19 @@
     <div class="top-nav">
       <div class="brand">
         <ion-icon name="bus-outline"></ion-icon>
-        <span>BMArutas</span>
+        <div class="brand-text" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <span>BMArutas</span>
+          <!-- Indicador de modo offline (Dinámico) -->
+          <div class="offline-badge" *ngIf="!offlineService.hayConexion">
+            <ion-icon name="cloud-offline-outline"></ion-icon>
+            <span>OFFLINE</span>
+          </div>
+        </div>
       </div>
       <div class="avatar">
-        <img src="https://i.pravatar.cc/100?img=11" alt="Roberto" />
+        <ion-icon name="person-outline"></ion-icon>
       </div>
+    </div><!-- /.top-nav -->
 
   <!-- Pull to refresh para que el conductor actualice la ruta -->
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
@@ -18,40 +26,41 @@
 
   <div class="header-section fade-in-down">
     <div class="user-greeting">
-      <h2 class="greeting-text">Hola,</h2>
-      <h1 class="user-name">{{ usuarioNombre }}</h1>
+      <h1 class="greeting-text">Hola, <span class="user-name">{{ usuarioNombre }}</span></h1>
     </div>
 
-    <!-- GREETING -->
-    <div class="greeting-sec">
-      <p class="subtitle">BIENVENIDO DE NUEVO</p>
-      <h1 class="title">Hola, {{ conductorNombre }}</h1>
+    <!-- ESTADO DE CARGA -->
+    <div *ngIf="cargandoRuta" class="loading-state fade-in-up" style="text-align: center; margin: 40px 0;">
+      <div class="loading-spinner" style="margin: 0 auto 16px; width: 32px; height: 32px; border: 3px solid #141d26; border-top-color: #00E5FF; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <p style="color: #94a3b8; font-family: 'Space Mono', monospace;">Cargando ruta...</p>
     </div>
 
-    <!-- MAIN ROUTE CARD -->
-    <div class="route-card-stitch fade-in-up" style="animation-delay: 0.1s">
-      <div class="status-pill status-wait">EN ESPERA</div>
-      <h2 class="route-title">{{ rutaAsignada }}</h2>
+    <!-- MAIN ROUTE CARD (BMAR-189, BMAR-190) -->
+    <div *ngIf="!cargandoRuta && rutaAsignada" class="route-card-stitch fade-in-up" style="animation-delay: 0.1s">
+      <div class="status-pill status-wait">{{ rutaAsignada.estado }}</div>
+      <h2 class="route-title">{{ rutaAsignada.nombre_ruta }}</h2>
+
+      <!-- Vehículo asignado -->
       <div class="truck-row">
         <ion-icon name="car-sport-outline"></ion-icon>
-        <span>Camión RE-024</span>
+        <span *ngIf="recorridoAsignado?.vehiculo_id">Vehículo asignado</span>
+        <span *ngIf="!recorridoAsignado?.vehiculo_id" style="color: #475569;">Sin vehículo asignado</span>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-box">
-          <span class="label">PARADAS</span>
-          <span class="val">12 puntos</span>
-        </div>
-        <div class="stat-box">
-          <span class="label">ESTIMADO</span>
-          <span class="val">4h 20m</span>
-        </div>
-      </div>
 
       <ion-button expand="block" class="stitch-play-btn" routerLink="/tabs/manifest">
         <ion-icon name="play-sharp" slot="start"></ion-icon>
         INICIAR RECORRIDO
       </ion-button>
+    </div>
+
+    <!-- BMAR-191: MENSAJE SIN RUTA ASIGNADA -->
+    <div *ngIf="!cargandoRuta && !rutaAsignada" class="no-route-card fade-in-up" style="animation-delay: 0.1s; background: #111833; border-radius: 24px; padding: 40px 24px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.03); margin-bottom: 24px;">
+      <div style="width: 64px; height: 64px; background: rgba(0, 229, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <ion-icon name="map-outline" style="font-size: 32px; color: #00E5FF;"></ion-icon>
+      </div>
+      <h3 style="color: #f1f5f9; font-size: 18px; margin-bottom: 8px; font-weight: 700;">Sin ruta asignada</h3>
+      <p style="color: #94a3b8; font-size: 14px; line-height: 1.5; margin-bottom: 24px;">Actualmente no tienes ninguna ruta programada para hoy. Desliza hacia abajo para actualizar.</p>
     </div>
 
     <!-- ACCESOS RÁPIDOS -->
@@ -102,5 +111,7 @@
       <ion-icon name="chevron-forward-outline" class="forward-icon"></ion-icon>
     </div>
 
-  </div>
+  </div><!-- /.header-section -->
+
+  </div><!-- /.main-wrapper -->
 </ion-content>

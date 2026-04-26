@@ -45,6 +45,14 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/mi-ruta/mi-ruta.page').then(m => m.MiRutaPage)
       },
       {
+        path: 'reportar',
+        loadComponent: () => import('./pages/reportar/reportar.page').then(m => m.ReportarPage)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
+      },
+      {
         path: '',
         redirectTo: '/tabs/ruta',
         pathMatch: 'full'
@@ -59,10 +67,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
 
-  // Reportar incidencia
+  // Reportar legacy (fuera de tabs — redirige al mismo dentro de tabs)
   {
     path: 'reportar',
-    loadComponent: () => import('./pages/reportar/reportar.page').then(m => m.ReportarPage)
+    redirectTo: '/tabs/reportar',
+    pathMatch: 'full'
   },
 
   // Fallback

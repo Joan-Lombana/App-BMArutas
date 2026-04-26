@@ -5,16 +5,18 @@
     <div class="top-nav">
       <div class="brand-info">
         <!-- TODO: Reemplazar URL por foto real del conductor desde el backend -->
+       
         <div class="avatar-placeholder">
           <ion-icon name="person-outline"></ion-icon>
         </div>
         <div class="brand-text">
           <span class="app-name">BMArutas</span>
-          <!-- Indicador de modo offline -->
-          <div class="offline-badge">
+          <!-- Indicador de modo offline (Dinámico) -->
+          <div class="offline-badge" *ngIf="!offlineService.hayConexion">
             <ion-icon name="cloud-offline-outline"></ion-icon>
             <span>OFFLINE</span>
           </div>
+
         </div>
       </div>
       <ion-icon name="notifications-outline" class="notif-icon"></ion-icon>

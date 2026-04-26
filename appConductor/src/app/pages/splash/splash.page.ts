@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonIcon, IonButton } from '@ionic/angular/standalone';
+import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { busOutline } from 'ionicons/icons';
@@ -10,7 +10,7 @@ import { busOutline } from 'ionicons/icons';
   templateUrl: './splash.page.html',
   styleUrls: ['./splash.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, IonButton, CommonModule, RouterModule]
+  imports: [IonContent, IonButton, CommonModule, RouterModule]
 })
 export class SplashPage implements OnInit {
 

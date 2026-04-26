@@ -1,0 +1,54 @@
+<ion-content [scrollY]="true" class="dark-profile">
+  <div class="main-wrapper fade-in-down">
+    
+    <div class="floating-header">
+      <ion-back-button defaultHref="/tabs/ruta" text=""></ion-back-button>
+      <div class="header-titles">
+        <h2>Mi Perfil</h2>
+      </div>
+    </div>
+
+    <!-- Avatar Section -->
+    <div class="avatar-section fade-in-up" style="animation-delay: 0.1s">
+      <div class="avatar-circle">
+        <ion-icon name="person-outline" class="avatar-icon"></ion-icon>
+        <!-- Botón de editar queda listo para cuando se implemente -->
+        <!-- <button class="edit-avatar-btn"><ion-icon name="create-outline"></ion-icon></button> -->
+      </div>
+      <h1 class="user-name">{{ usuario?.primerNombre }} {{ usuario?.primerApellido }}</h1>
+      <span class="user-role">{{ (usuario?.rol || 'USUARIO') | uppercase }}</span>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-section fade-in-up" style="animation-delay: 0.2s">
+      <div class="info-card">
+        <div class="icon-box">
+          <ion-icon name="mail-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <span class="label">Correo Electrónico</span>
+          <span class="value">{{ usuario?.correo || 'conductor@bmarutas.com' }}</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="icon-box">
+          <ion-icon name="call-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <span class="label">Teléfono</span>
+          <span class="value">{{ usuario?.numero_celular || '+57 300 000 0000' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-section fade-in-up" style="animation-delay: 0.3s">
+      <ion-button expand="block" fill="clear" class="logout-btn" (click)="cerrarSesion()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar Sesión
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

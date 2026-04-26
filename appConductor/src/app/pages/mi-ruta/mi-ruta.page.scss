@@ -28,6 +28,131 @@
   z-index: 5 !important;
 }
 
+/* Estado de carga del mapa — Globo girando */
+.map-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #0a0f24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+
+.globe-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+
+  // Anillo exterior pulsante
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 229, 255, 0.15);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  // Segundo anillo
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -24px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 229, 255, 0.07);
+    animation: pulse-ring 2s ease-out 0.5s infinite;
+  }
+}
+
+.globe-emoji {
+  font-size: 88px;
+  display: block;
+  animation: globe-spin 3s linear infinite;
+  filter: drop-shadow(0 0 24px rgba(0, 229, 255, 0.4));
+  line-height: 1;
+}
+
+.loading-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  .loading-title {
+    color: #f1f5f9;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .loading-sub {
+    color: #00E5FF;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.8;
+    animation: fade-cycle 3s ease-in-out infinite;
+  }
+}
+
+// Barra de progreso
+.loading-bar-bg {
+  width: 140px;
+  height: 3px;
+  background: rgba(0, 229, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+
+  .loading-bar-fill {
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, #00E5FF, transparent);
+    border-radius: 4px;
+    animation: loading-sweep 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes globe-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+@keyframes loading-sweep {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(400%); }
+}
+
+@keyframes fade-cycle {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* Etiquetas de paradas en el mapa (BMAR-181) */
+::ng-deep .parada-label {
+  background: rgba(10, 15, 36, 0.85);
+  color: #00E5FF;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Marcador del conductor (BMAR-182) */
+::ng-deep .conductor-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
 /* CABECERA FLOTANTE — fixed para que siempre esté sobre el mapa */
 .floating-header.stitch-header {
   position: fixed;
@@ -38,7 +163,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0d131a;
+  background: #0a0f24;
   border-radius: 28px;
   padding: 12px 12px 12px 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -47,7 +172,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #2ecc71;
+    color: #00E5FF;
     font-weight: 800;
     font-size: 16px;
 
@@ -55,7 +180,7 @@
   }
 
   .timer-pill {
-    background: #141d26;
+    background: #111833;
     padding: 10px 16px;
     border-radius: 20px;
     display: flex;
@@ -66,7 +191,7 @@
     font-family: monospace;
     font-size: 15px;
 
-    ion-icon { color: #2ecc71; }
+    ion-icon { color: #00E5FF; }
   }
 }
 
@@ -78,123 +203,220 @@
   z-index: 20;
 
   .glass-fab {
-    --background: #141d26;
+    --background: #111833;
     --color: #f1f5f9;
     --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 }
 
-/* BOTTOM SHEET — fixed en la parte baja del viewport */
-.bottom-sheet.stitch-sheet {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  background: #0d131a;
-  border-radius: 36px 36px 0 0;
-  padding: 16px 24px calc(16px + env(safe-area-inset-bottom, 0px));
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+/* =========================================
+   BMAR-182: Estilos Marcador Google Maps
+   ========================================= */
+::ng-deep .conductor-marker {
+  background: transparent;
+  border: none;
+}
 
-  .sheet-handle {
+::ng-deep .location-marker-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep .location-dot {
+  width: 18px;
+  height: 18px;
+  background-color: #00E5FF;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+::ng-deep .location-pulse {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 229, 255, 0.3);
+  border-radius: 50%;
+  z-index: 1;
+  animation: pulse-aura 2s infinite ease-out;
+}
+
+/* El cono de dirección (para el futuro cuando usemos la brújula del dispositivo) */
+::ng-deep .location-cone {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 40px solid rgba(0, 229, 255, 0.2);
+  top: -10px;
+  /* El transform rotate() se usará desde TS para apuntar a donde mira el celular */
+  transform-origin: bottom center;
+  opacity: 0; /* Oculto por ahora hasta tener los datos de la brújula */
+  transition: transform 0.3s ease-out;
+  z-index: 0;
+}
+
+@keyframes pulse-aura {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* MODAL BOTTOM SHEET NATIVA */
+ion-modal.bottom-sheet-modal {
+  --background: #0a0f24;
+  --border-radius: 36px;
+  --box-shadow: 0 4px 32px rgba(0, 0, 0, 0.6);
+  
+  /* Elevamos el modal físicamente por encima de la barra de tabs */
+  &::part(content) {
+    bottom: 90px;
+    height: calc(100% - 90px);
+    margin: 0 auto;
+    width: 96%; /* Para que flote como los tabs con algo de margen */
+  }
+
+  &::part(handle) {
+    background: rgba(255, 255, 255, 0.2);
     width: 48px;
     height: 4px;
-    background: #1e293b;
-    border-radius: 4px;
-    margin: 0 auto 20px;
+    margin-top: 12px;
+    margin-bottom: 4px;
   }
+}
 
-  .progress-section {
-    margin-bottom: 20px;
+.bottom-sheet-content.stitch-sheet {
+  --padding-top: 8px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+  --padding-bottom: 24px; // Padding normal, el modal ya está elevado
 
-    .label {
-      font-size: 10px;
-      color: #64748b;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
 
-    .flex-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin: 4px 0 12px 0;
-
-      .percent {
-        margin: 0;
-        font-size: 32px;
-        color: #2ecc71;
-        font-weight: 800;
-      }
-      .stops {
-        color: #94a3b8;
-        font-size: 12px;
-        font-weight: 600;
-      }
-    }
-
-    .progress-bar-bg {
-      height: 8px;
-      background: #1e293b;
-      border-radius: 4px;
-
-      .progress-bar-fill {
-        background: #2ecc71;
-        border-radius: 4px;
-        height: 100%;
-      }
-    }
-  }
-
-  .next-stop-stitch {
-    background: #141d26;
-    border-radius: 20px;
-    padding: 16px;
+  // Encabezado con nombre de ruta + badge
+  .sheet-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
     margin-bottom: 16px;
 
-    .loc-icon {
-      width: 44px;
-      height: 44px;
-      background: rgba(46, 204, 113, 0.1);
-      border-radius: 12px;
+    .route-info {
+      .route-label {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        display: block;
+        margin-bottom: 2px;
+      }
+      .route-name {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 800;
+        color: #f1f5f9;
+        text-transform: capitalize;
+      }
+    }
+
+    .status-badge {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      ion-icon { color: #2ecc71; font-size: 22px; }
-    }
-
-    .ns-info {
-      flex: 1;
-      .label {
-        font-size: 10px;
-        color: #f59e0b;
-        font-weight: 800;
-        letter-spacing: 1px;
-      }
-      h3 {
-        margin: 2px 0 1px 0;
-        color: #f1f5f9;
-        font-size: 16px;
-        font-weight: 700;
-      }
-      p {
-        margin: 0;
-        color: #64748b;
-        font-size: 12px;
-      }
-    }
-
-    .distance-metric {
-      color: #2ecc71;
-      font-size: 16px;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
       font-weight: 800;
+      letter-spacing: 1px;
+
+      .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      &.badge-active {
+        background: rgba(0, 229, 255, 0.15);
+        color: #00E5FF;
+        .badge-dot { background: #00E5FF; box-shadow: 0 0 8px #00E5FF; animation: pulse 1.5s infinite; }
+      }
+      &.badge-idle {
+        background: rgba(100, 116, 139, 0.15);
+        color: #64748b;
+        .badge-dot { background: #64748b; }
+      }
     }
   }
+
+  // Grid de métricas en tiempo real
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+
+    .metric-card {
+      background: #111833;
+      border-radius: 16px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 18px;
+        color: #00E5FF;
+        margin-bottom: 2px;
+      }
+
+      .metric-val {
+        font-size: 18px;
+        font-weight: 800;
+        color: #f1f5f9;
+        font-variant-numeric: tabular-nums;
+        &.gps-val { font-size: 14px; color: #00E5FF; }
+      }
+
+      .metric-label {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  // Estado en reposo
+  .idle-info {
+    background: #111833;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+
+    .idle-icon {
+      font-size: 32px;
+      color: #334155;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+
+      strong { color: #00E5FF; }
+    }
+  }
+
+
 
   .actions-row-stitch {
     display: flex;
@@ -216,17 +438,52 @@
       ion-icon { font-size: 18px; }
 
       &.btn-check {
-        background: linear-gradient(135deg, #2ecc71, #10b981);
-        color: #0d131a;
-        box-shadow: 0 6px 16px rgba(46, 204, 113, 0.2);
+        background: linear-gradient(135deg, #00E5FF, #0ea5e9);
+        color: #0a0f24;
+        box-shadow: 0 6px 16px rgba(0, 229, 255, 0.2);
       }
 
       &.btn-pause {
-        background: #141d26;
+        background: #111833;
         color: #f1f5f9;
 
         ion-icon { color: #94a3b8; }
       }
     }
+  }
+
+  .btn-finalizar {
+    width: 100%;
+    margin-top: 10px;
+    border: 1.5px solid rgba(239, 68, 68, 0.4);
+    border-radius: 20px;
+    height: 48px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    ion-icon { font-size: 18px; }
+
+    &:active { background: rgba(239, 68, 68, 0.2); }
+  }
+}
+
+.back-fab {
+  top: max(env(safe-area-inset-top), 16px) !important;
+  left: 16px !important;
+  z-index: 20;
+
+  .glass-fab {
+    --background: #111833;
+    --color: #f1f5f9;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 }

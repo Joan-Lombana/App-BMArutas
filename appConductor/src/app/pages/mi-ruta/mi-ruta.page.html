@@ -1,69 +1,112 @@
 <ion-content [fullscreen]="true" [scrollY]="false" class="dark-map-content">
-  <!-- FLOTANTE SUPERIOR STITCH -->
-  <div class="floating-header stitch-header">
-    <div class="brand">
-      <ion-icon name="bus-outline"></ion-icon>
-      BMArutas
+
+  <!-- LOADING: Globo girando -->
+  <div *ngIf="cargandoRuta" class="map-loading">
+    <div class="globe-container">
+      <span class="globe-emoji">🌎</span>
     </div>
-    <div class="timer-pill">
-      <ion-icon name="timer-outline"></ion-icon>
-      <span>01:24:36</span>
+    <div class="loading-text">
+      <span class="loading-title">Localizando tu ruta</span>
+      <span class="loading-sub">Conectando con el servidor...</span>
+    </div>
+    <div class="loading-bar-bg">
+      <div class="loading-bar-fill"></div>
     </div>
   </div>
-
-  <!-- MAPA LEAFLET -->
   <div class="map-wrapper" #mapContainer></div>
 
+  <!-- BOTÓN FLOTANTE REGRESAR (FAB) -->
+  <ion-fab *ngIf="!cargandoRuta" vertical="top" horizontal="start" slot="fixed" class="back-fab">
+    <ion-fab-button class="glass-fab" (click)="goBack()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
   <!-- BOTÓN FLOTANTE UBICACIÓN (FAB) -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="location-fab">
-    <ion-fab-button class="glass-fab" (click)="centerOnUser()">
+  <ion-fab *ngIf="!cargandoRuta" vertical="bottom" horizontal="end" slot="fixed" class="location-fab">
+    <ion-fab-button class="glass-fab" (click)="centrarEnConductor()">
       <ion-icon name="locate"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 
-  <!-- BOTTOM SHEET STITCH -->
-  <div class="bottom-sheet stitch-sheet">
-    <div class="sheet-handle"></div>
-    
-    <div class="progress-section">
-      <span class="label">PROGRESO TOTAL</span>
-      <div class="flex-row">
-        <h1 class="percent">{{ progresoPorcentaje }}%</h1>
-        <span class="stops">14 / 40 Paradas</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" [style.width]="progresoPorcentaje + '%'"></div>
-      </div>
-    </div>
+  <!-- BOTTOM SHEET -->
+  <ion-modal
+    class="bottom-sheet-modal"
+    [isOpen]="modalAbierto"
+    [canDismiss]="false"
+    [initialBreakpoint]="0.15"
+    [breakpoints]="[0.15, 0.4, 0.75]"
+    [backdropDismiss]="false"
+    [backdropBreakpoint]="1"
+    handle="true">
+    <ng-template>
+      <ion-content class="bottom-sheet-content stitch-sheet">
 
-    <!-- Próxima Parada Box -->
-    <div class="next-stop-stitch">
-      <div class="loc-icon">
-        <ion-icon name="location"></ion-icon>
-      </div>
-      <div class="ns-info">
-        <span class="label">PRÓXIMA PARADA</span>
-        <h3>Cra 15 #...</h3>
-        <p>Barrio San José</p>
-      </div>
-      <div class="distance-metric">
-        200m
-      </div>
-    </div>
+        <!-- Encabezado: nombre de la ruta + badge de estado -->
+        <div class="sheet-header">
+          <div class="route-info">
+            <span class="route-label">RUTA ASIGNADA</span>
+            <h2 class="route-name">{{ rutaCargada?.nombre_ruta || 'Sin ruta asignada' }}</h2>
+          </div>
+          <div class="status-badge" [class.badge-active]="recorridoActivo" [class.badge-idle]="!recorridoActivo">
+            <span class="badge-dot"></span>
+            {{ recorridoActivo ? 'EN VIVO' : (recorridoIdActual ? 'LISTO' : 'SIN ASIGNAR') }}
+          </div>
+        </div>
 
-    <!-- Botones Accion -->
-    <div class="actions-row-stitch">
-      <button class="btn-check" (click)="registrarParada()">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        REGISTRAR PARADA
-      </button>
+        <!-- Métricas en tiempo real (visibles cuando activo) -->
+        <div class="metrics-grid" *ngIf="recorridoActivo">
+          <div class="metric-card">
+            <ion-icon name="timer-outline"></ion-icon>
+            <span class="metric-val">{{ tiempoTranscurrido }}</span>
+            <span class="metric-label">Tiempo</span>
+          </div>
+          <div class="metric-card">
+            <ion-icon name="radio-outline"></ion-icon>
+            <span class="metric-val">{{ posicionesenviadas }}</span>
+            <span class="metric-label">Posiciones</span>
+          </div>
+          <div class="metric-card" *ngIf="posicionActual">
+            <ion-icon name="location-outline"></ion-icon>
+            <span class="metric-val gps-val">{{ posicionActual.lat | number:'1.4-4' }}</span>
+            <span class="metric-label">Latitud</span>
+          </div>
+          <div class="metric-card" *ngIf="posicionActual">
+            <ion-icon name="navigate-outline"></ion-icon>
+            <span class="metric-val gps-val">{{ posicionActual.lng | number:'1.4-4' }}</span>
+            <span class="metric-label">Longitud</span>
+          </div>
+        </div>
 
-      <button class="btn-pause" (click)="pausarRecorrido()">
-        <ion-icon name="pause-circle"></ion-icon>
-        PAUSAR RECORRIDO
-      </button>
-    </div>
+        <!-- Estado cuando NO está activo -->
+        <div class="idle-info" *ngIf="!recorridoActivo">
+          <ion-icon name="map-outline" class="idle-icon"></ion-icon>
+          <p *ngIf="recorridoIdActual">Presiona <strong>INICIAR</strong> para comenzar a transmitir tu ubicación en tiempo real.</p>
+          <p *ngIf="!recorridoIdActual">No tienes ningún recorrido asignado. Contacta al administrador.</p>
+        </div>
 
-  </div>
+        <!-- Botones de acción -->
+        <div class="actions-row-stitch">
+          <button class="btn-check" (click)="toggleRecorrido()" [disabled]="!recorridoIdActual">
+            <ion-icon [name]="recorridoActivo ? 'pause-circle' : 'play-circle'"></ion-icon>
+            {{ recorridoActivo ? 'PAUSAR' : 'INICIAR' }}
+          </button>
+          <button class="btn-pause" (click)="centrarEnConductor()">
+            <ion-icon name="locate"></ion-icon>
+            MI POSICIÓN
+          </button>
+        </div>
+
+        <!-- Botón FINALIZAR (solo cuando hay recorrido asignado) -->
+        <button
+          class="btn-finalizar"
+          *ngIf="recorridoIdActual"
+          (click)="confirmarFinalizar()">
+          <ion-icon name="stop-circle-outline"></ion-icon>
+          FINALIZAR RECORRIDO
+        </button>
+
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
-

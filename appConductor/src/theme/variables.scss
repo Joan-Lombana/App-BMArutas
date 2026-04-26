@@ -8,20 +8,11 @@
 // =========================================
 :root {
   --ion-font-family: 'Space Mono', monospace;
-  --ion-background-color: #0d131a;
+  --ion-background-color: #0a0f24;
   --ion-text-color: #f1f5f9;
 }
 
-// Aplicar también directamente al body y a ion-app
-// para garantizar cobertura total
-body,
-ion-app,
-ion-content,
-ion-label,
-ion-button,
-ion-title,
-ion-input,
-ion-textarea,
-ion-item {
+// Aplicar a absolutamente todos los elementos HTML nativos y componentes
+* {
   font-family: 'Space Mono', monospace !important;
 }

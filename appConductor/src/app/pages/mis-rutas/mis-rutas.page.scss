@@ -1,5 +1,5 @@
 .mis-rutas-content {
-  --background: #0d131a;
+  --background: #0a0f24;
 }
 
 .wrapper {
@@ -28,7 +28,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid rgba(46, 204, 113, 0.3);
+      border: 2px solid rgba(0, 229, 255, 0.25);
       ion-icon {
         font-size: 20px;
         color: #94a3b8;
@@ -154,15 +154,15 @@
 
   &:active { transform: scale(0.98); }
 
-  // Variante ACTIVA — borde verde sutil
+  // Variante ACTIVA — borde cyan sutil
   &--activa {
-    border-color: rgba(46, 204, 113, 0.2);
-    background: linear-gradient(135deg, #141d26 60%, rgba(46, 204, 113, 0.04));
+    border-color: rgba(0, 229, 255, 0.2);
+    background: linear-gradient(135deg, #141d26 60%, rgba(0, 229, 255, 0.04));
   }
 
-  // Variante FINALIZADA — más apagada
-  &--finalizada {
-    opacity: 0.7;
+  // Variante ASIGNADA — borde blanco muy sutil
+  &--asignada {
+    border-color: rgba(255, 255, 255, 0.07);
   }
 }
 
@@ -181,7 +181,7 @@
   .codigo {
     font-size: 22px;
     font-weight: 800;
-    color: #f97316; // naranja como en la referencia
+    color: #00E5FF;
     letter-spacing: -0.5px;
   }
 }
@@ -198,13 +198,13 @@
   letter-spacing: 1px;
 
   &--activa {
-    background: rgba(46, 204, 113, 0.15);
-    color: #2ecc71;
+    background: rgba(0, 229, 255, 0.12);
+    color: #00E5FF;
   }
 
   &--asignada {
-    background: rgba(148, 163, 184, 0.1);
-    color: #94a3b8;
+    background: rgba(100, 116, 139, 0.12);
+    color: #64748b;
   }
 
   &--finalizada {
@@ -246,8 +246,8 @@
   }
 
   .btn-continuar {
-    background: #f97316;
-    color: #ffffff;
+    background: linear-gradient(135deg, #00E5FF, #0ea5e9);
+    color: #0a0f24;
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
@@ -267,7 +267,7 @@
 
   .check-icon {
     font-size: 22px;
-    color: #2ecc71;
+    color: #00E5FF;
   }
 }
 

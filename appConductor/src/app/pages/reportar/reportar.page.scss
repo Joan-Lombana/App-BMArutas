@@ -1,0 +1,190 @@
+.dark-report {
+  --background: #0a0f24;
+}
+
+.floating-header {
+  display: flex;
+  align-items: center;
+  padding: env(safe-area-inset-top, 20px) 16px 12px;
+  background: transparent;
+
+  ion-back-button {
+    --color: #00E5FF;
+  }
+
+  .header-titles {
+    flex: 1;
+    text-align: center;
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #00E5FF;
+      padding-right: 48px; /* balance out back button */
+    }
+  }
+}
+
+.report-container {
+  padding: 16px 20px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.mt-4 {
+  margin-top: 24px;
+}
+
+.incident-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.incident-card {
+  background: #111833;
+  border-radius: 16px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+
+  span {
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    
+    &.warning-bg { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    &.danger-bg { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    &.success-bg { background: rgba(0, 229, 255, 0.15); color: #00E5FF; }
+    &.gray-bg { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &.selected {
+    border-color: #00E5FF;
+    background: rgba(0, 229, 255, 0.05);
+  }
+}
+
+.other-card {
+  flex-direction: row;
+  padding: 16px 20px;
+}
+
+.photo-capture-area {
+  height: 180px;
+  background: #1a2635 url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+  border-radius: 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 19, 26, 0.6); /* Oscurecer foto de mockup */
+  }
+
+  .camera-btn {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      background: #00E5FF; /* Electric Cyan */
+      color: #0a0f24;
+      font-size: 32px;
+      padding: 16px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+    }
+    
+    span {
+      color: #00E5FF;
+      font-weight: 700;
+      font-size: 14px;
+    }
+  }
+}
+
+.textarea-wrapper {
+  background: #111833;
+  border-radius: 16px;
+  padding: 1px;
+  height: 100px;
+  margin-bottom: 24px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  /* simular un borde gradiente abajo estilo stitch */
+  border-bottom: 2px solid #00E5FF;
+  
+  textarea {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 16px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    
+    &::placeholder {
+      color: #64748b;
+    }
+  }
+}
+
+.submit-btn {
+  --background: #00E5FF;
+  --color: #0a0f24;
+  --border-radius: 28px;
+  font-weight: 800;
+  font-size: 15px;
+  height: 56px;
+  letter-spacing: 0.5px;
+  --box-shadow: 0 8px 16px rgba(0, 229, 255, 0.2);
+}
+
+.pulse-animation ion-icon {
+  animation: pulseLight 2s infinite;
+}
+
+@keyframes pulseLight {
+  0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+}

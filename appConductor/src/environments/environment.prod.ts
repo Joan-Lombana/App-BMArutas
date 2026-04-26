@@ -1,5 +1,4 @@
-
 export const environment = {
   production: true,
-  apiUrl: 'https://mi-servidor.com'
+  apiUrl: 'http://10.0.2.2:3000/api'
 };

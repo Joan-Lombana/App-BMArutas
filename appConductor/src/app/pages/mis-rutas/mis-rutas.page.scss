@@ -1,0 +1,340 @@
+.mis-rutas-content {
+  --background: #0a0f24;
+}
+
+.wrapper {
+  padding: env(safe-area-inset-top, 20px) 20px 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+// --- HEADER ---
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+
+  .brand-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(0, 229, 255, 0.25);
+      ion-icon {
+        font-size: 20px;
+        color: #94a3b8;
+      }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .app-name {
+        color: #f1f5f9;
+        font-weight: 800;
+        font-size: 15px;
+      }
+
+      .offline-badge {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #1e293b;
+        padding: 2px 8px;
+        border-radius: 12px;
+        width: fit-content;
+
+        ion-icon { color: #94a3b8; font-size: 11px; }
+        span { color: #94a3b8; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+      }
+    }
+  }
+
+  .notif-icon {
+    font-size: 24px;
+    color: #94a3b8;
+  }
+}
+
+// --- TÍTULO ---
+.title-section {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: #f1f5f9;
+    letter-spacing: -0.5px;
+  }
+
+  .fecha {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+}
+
+// --- LABELS REUTILIZABLES ---
+.label-small {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: block;
+}
+.mt-4 { margin-top: 12px; }
+
+// --- ESTADO VACÍO ---
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px;
+  text-align: center;
+  gap: 12px;
+
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    background: #141d26;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    ion-icon {
+      font-size: 32px;
+      color: #334155;
+    }
+  }
+
+  .empty-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #475569;
+  }
+
+  .empty-sub {
+    margin: 0;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+  }
+}
+
+// --- LISTA DE RUTAS ---
+.rutas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ruta-card {
+  background: #141d26;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  &:active { transform: scale(0.98); }
+
+  // Variante ACTIVA — borde cyan sutil
+  &--activa {
+    border-color: rgba(0, 229, 255, 0.2);
+    background: linear-gradient(135deg, #141d26 60%, rgba(0, 229, 255, 0.04));
+  }
+
+  // Variante ASIGNADA — borde blanco muy sutil
+  &--asignada {
+    border-color: rgba(255, 255, 255, 0.07);
+  }
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+
+  .card-codigo-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .codigo {
+    font-size: 22px;
+    font-weight: 800;
+    color: #00E5FF;
+    letter-spacing: -0.5px;
+  }
+}
+
+// BADGES DE ESTADO
+.estado-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+
+  &--activa {
+    background: rgba(0, 229, 255, 0.12);
+    color: #00E5FF;
+  }
+
+  &--asignada {
+    background: rgba(100, 116, 139, 0.12);
+    color: #64748b;
+  }
+
+  &--finalizada {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .dot-green {
+    width: 6px;
+    height: 6px;
+    background: #2ecc71;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+  }
+}
+
+.zona-nombre {
+  margin: 4px 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.2;
+}
+
+.card-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .horario {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+
+    ion-icon { color: #64748b; font-size: 16px; }
+  }
+
+  .btn-continuar {
+    background: linear-gradient(135deg, #00E5FF, #0ea5e9);
+    color: #0a0f24;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:active { opacity: 0.85; }
+  }
+
+  .arrow-icon {
+    font-size: 20px;
+    color: #475569;
+  }
+
+  .check-icon {
+    font-size: 22px;
+    color: #00E5FF;
+  }
+}
+
+// --- RESUMEN DE JORNADA ---
+.jornada-card {
+  background: #141d26;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+
+  .jornada-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #64748b;
+
+    .pct { color: #94a3b8; }
+  }
+
+  .jornada-bar {
+    height: 6px;
+    background: #1e293b;
+    border-radius: 4px;
+    margin-bottom: 20px;
+
+    .jornada-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #f97316);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+  }
+
+  .jornada-stats {
+    display: flex;
+    justify-content: space-between;
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .stat-val {
+        font-size: 22px;
+        font-weight: 800;
+        color: #f1f5f9;
+
+        &.highlight { color: #f97316; }
+      }
+    }
+  }
+}
+
+// Animaciones
+.fade-in-down {
+  animation: fadeInDown 0.4s ease-out forwards;
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

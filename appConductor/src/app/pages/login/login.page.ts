@@ -95,13 +95,13 @@ export class LoginPage implements OnInit {
         if (rol === 'admin' || rol === 'conductor') {
 
           this.router.navigate(
-            ['/dashboard'],
+            ['/tabs/ruta'],
             { replaceUrl: true }
           );
 
         } else {
 
-          alert('No autorizado');
+          alert(`No autorizado. Rol recibido: ${rol}`);
           this.auth.logout();
 
         }
@@ -109,16 +109,19 @@ export class LoginPage implements OnInit {
       },
 
       error: (err) => {
-
         this.cargando = false;
-
-        console.log(err);
-
-        alert(
-          err?.error?.message ||
-          'Credenciales incorrectas'
-        );
-
+        console.log('API Error:', err);
+        
+        let msg = '';
+        if (err.status === 0) {
+          msg = `Red: Error 0. Backend apagado o bloqueado. (${err.message})`;
+        } else if (err.status === 401) {
+          msg = 'Credenciales incorrectas (401). Verifica el correo y la contraseña en la base de datos.';
+        } else {
+          msg = `Error ${err.status}: ${err.error?.message || err.message}`;
+        }
+        
+        alert(msg);
       }
 
     });

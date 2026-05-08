@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonButtons, IonBackButton, IonIcon, IonButton } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -10,7 +10,7 @@ import { constructOutline, banOutline, mapOutline, carOutline, ellipsisHorizonta
   templateUrl: './reportar.page.html',
   styleUrls: ['./reportar.page.scss'],
   standalone: true,
-  imports: [IonContent, IonButtons, IonBackButton, IonIcon, IonButton, CommonModule, FormsModule]
+  imports: [IonContent, IonButtons, IonBackButton, IonIcon, IonButton, FormsModule]
 })
 export class ReportarPage {
 

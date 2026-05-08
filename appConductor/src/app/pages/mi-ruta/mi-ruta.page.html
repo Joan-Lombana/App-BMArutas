@@ -1,33 +1,39 @@
 <ion-content [fullscreen]="true" [scrollY]="false" class="dark-map-content">
 
   <!-- LOADING: Globo girando -->
-  <div *ngIf="cargandoRuta" class="map-loading">
-    <div class="globe-container">
-      <span class="globe-emoji">🌎</span>
+  @if (cargandoRuta) {
+    <div class="map-loading">
+      <div class="globe-container">
+        <span class="globe-emoji">🌎</span>
+      </div>
+      <div class="loading-text">
+        <span class="loading-title">Localizando tu ruta</span>
+        <span class="loading-sub">Conectando con el servidor...</span>
+      </div>
+      <div class="loading-bar-bg">
+        <div class="loading-bar-fill"></div>
+      </div>
     </div>
-    <div class="loading-text">
-      <span class="loading-title">Localizando tu ruta</span>
-      <span class="loading-sub">Conectando con el servidor...</span>
-    </div>
-    <div class="loading-bar-bg">
-      <div class="loading-bar-fill"></div>
-    </div>
-  </div>
+  }
   <div class="map-wrapper" #mapContainer></div>
 
   <!-- BOTÓN FLOTANTE REGRESAR (FAB) -->
-  <ion-fab *ngIf="!cargandoRuta" vertical="top" horizontal="start" slot="fixed" class="back-fab">
-    <ion-fab-button class="glass-fab" (click)="goBack()">
-      <ion-icon name="arrow-back-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+  @if (!cargandoRuta) {
+    <ion-fab vertical="top" horizontal="start" slot="fixed" class="back-fab">
+      <ion-fab-button class="glass-fab" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  }
 
   <!-- BOTÓN FLOTANTE UBICACIÓN (FAB) -->
-  <ion-fab *ngIf="!cargandoRuta" vertical="bottom" horizontal="end" slot="fixed" class="location-fab">
-    <ion-fab-button class="glass-fab" (click)="centrarEnConductor()">
-      <ion-icon name="locate"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+  @if (!cargandoRuta) {
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="location-fab">
+      <ion-fab-button class="glass-fab" (click)="centrarEnConductor()">
+        <ion-icon name="locate"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  }
 
   <!-- BOTTOM SHEET -->
   <ion-modal
@@ -55,35 +61,47 @@
         </div>
 
         <!-- Métricas en tiempo real (visibles cuando activo) -->
-        <div class="metrics-grid" *ngIf="recorridoActivo">
-          <div class="metric-card">
-            <ion-icon name="timer-outline"></ion-icon>
-            <span class="metric-val">{{ tiempoTranscurrido }}</span>
-            <span class="metric-label">Tiempo</span>
+        @if (recorridoActivo) {
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <ion-icon name="timer-outline"></ion-icon>
+              <span class="metric-val">{{ tiempoTranscurrido }}</span>
+              <span class="metric-label">Tiempo</span>
+            </div>
+            <div class="metric-card">
+              <ion-icon name="radio-outline"></ion-icon>
+              <span class="metric-val">{{ posicionesenviadas }}</span>
+              <span class="metric-label">Posiciones</span>
+            </div>
+            @if (posicionActual) {
+              <div class="metric-card">
+                <ion-icon name="location-outline"></ion-icon>
+                <span class="metric-val gps-val">{{ posicionActual.lat | number:'1.4-4' }}</span>
+                <span class="metric-label">Latitud</span>
+              </div>
+            }
+            @if (posicionActual) {
+              <div class="metric-card">
+                <ion-icon name="navigate-outline"></ion-icon>
+                <span class="metric-val gps-val">{{ posicionActual.lng | number:'1.4-4' }}</span>
+                <span class="metric-label">Longitud</span>
+              </div>
+            }
           </div>
-          <div class="metric-card">
-            <ion-icon name="radio-outline"></ion-icon>
-            <span class="metric-val">{{ posicionesenviadas }}</span>
-            <span class="metric-label">Posiciones</span>
-          </div>
-          <div class="metric-card" *ngIf="posicionActual">
-            <ion-icon name="location-outline"></ion-icon>
-            <span class="metric-val gps-val">{{ posicionActual.lat | number:'1.4-4' }}</span>
-            <span class="metric-label">Latitud</span>
-          </div>
-          <div class="metric-card" *ngIf="posicionActual">
-            <ion-icon name="navigate-outline"></ion-icon>
-            <span class="metric-val gps-val">{{ posicionActual.lng | number:'1.4-4' }}</span>
-            <span class="metric-label">Longitud</span>
-          </div>
-        </div>
+        }
 
         <!-- Estado cuando NO está activo -->
-        <div class="idle-info" *ngIf="!recorridoActivo">
-          <ion-icon name="map-outline" class="idle-icon"></ion-icon>
-          <p *ngIf="recorridoIdActual">Presiona <strong>INICIAR</strong> para comenzar a transmitir tu ubicación en tiempo real.</p>
-          <p *ngIf="!recorridoIdActual">No tienes ningún recorrido asignado. Contacta al administrador.</p>
-        </div>
+        @if (!recorridoActivo) {
+          <div class="idle-info">
+            <ion-icon name="map-outline" class="idle-icon"></ion-icon>
+            @if (recorridoIdActual) {
+              <p>Presiona <strong>INICIAR</strong> para comenzar a transmitir tu ubicación en tiempo real.</p>
+            }
+            @if (!recorridoIdActual) {
+              <p>No tienes ningún recorrido asignado. Contacta al administrador.</p>
+            }
+          </div>
+        }
 
         <!-- Botones de acción -->
         <div class="actions-row-stitch">
@@ -98,13 +116,14 @@
         </div>
 
         <!-- Botón FINALIZAR (solo cuando hay recorrido asignado) -->
-        <button
-          class="btn-finalizar"
-          *ngIf="recorridoIdActual"
-          (click)="confirmarFinalizar()">
-          <ion-icon name="stop-circle-outline"></ion-icon>
-          FINALIZAR RECORRIDO
-        </button>
+        @if (recorridoIdActual) {
+          <button
+            class="btn-finalizar"
+            (click)="confirmarFinalizar()">
+            <ion-icon name="stop-circle-outline"></ion-icon>
+            FINALIZAR RECORRIDO
+          </button>
+        }
 
       </ion-content>
     </ng-template>

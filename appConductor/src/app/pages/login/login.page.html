@@ -60,8 +60,12 @@
         (click)="iniciarSesion()"
         [disabled]="cargando">
 
-        <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
-        <span *ngIf="!cargando">Continuar</span>
+        @if (cargando) {
+          <ion-spinner name="crescent"></ion-spinner>
+        }
+        @if (!cargando) {
+          <span>Continuar</span>
+        }
 
       </ion-button>
 

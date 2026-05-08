@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { 
@@ -17,7 +17,7 @@ import { inject, effect } from '@angular/core';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonContent, IonButton, IonIcon, IonRefresher, IonRefresherContent, CommonModule, FormsModule, RouterLink, DatePipe]
+  imports: [IonContent, IonButton, IonIcon, IonRefresher, IonRefresherContent, FormsModule, RouterLink, DatePipe]
 })
 export class DashboardPage implements OnInit {
 

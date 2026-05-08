@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 import {
@@ -35,10 +35,9 @@ import { Auth } from '../../services/auth';
     IonInput,
     IonItem,
     IonSpinner,
-    CommonModule,
     FormsModule,
     RouterModule
-  ]
+]
 })
 export class LoginPage implements OnInit {
 

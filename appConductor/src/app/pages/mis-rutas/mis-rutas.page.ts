@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
@@ -29,7 +29,7 @@ export interface ResumenJornada {
   templateUrl: './mis-rutas.page.html',
   styleUrls: ['./mis-rutas.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, CommonModule, FormsModule, RouterModule]
+  imports: [IonContent, IonIcon, FormsModule, RouterModule]
 })
 export class MisRutasPage implements OnInit {
 

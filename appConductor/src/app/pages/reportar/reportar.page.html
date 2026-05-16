@@ -2,7 +2,7 @@
   <!-- FLOTANTE SUPERIOR -->
   <div class="floating-header">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/ruta" color="success"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/ruta"></ion-back-button>
     </ion-buttons>
     <div class="header-titles">
       <h2>Reportar Incidencia</h2>
@@ -54,20 +54,30 @@
     <span class="section-label mt-4">EVIDENCIA FOTOGRÁFICA</span>
     
     <div class="photo-capture-area">
-      <div class="camera-btn pulse-animation">
-        <ion-icon name="camera-outline"></ion-icon>
-        <span>Tomar Foto</span>
-      </div>
+      @if (!fotoBase64) {
+        <div class="camera-btn pulse-animation" (click)="tomarFoto()">
+          <ion-icon name="camera-outline"></ion-icon>
+          <span>Tomar Foto</span>
+        </div>
+      }
+      @if (fotoBase64) {
+        <div class="photo-preview-container">
+          <img [src]="fotoBase64" class="photo-preview" alt="Evidencia fotográfica" />
+          <div class="remove-photo-btn" (click)="removerFoto()">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </div>
+        </div>
+      }
     </div>
 
     <span class="section-label mt-4">DESCRIPCIÓN BREVE</span>
     <div class="textarea-wrapper">
-      <textarea placeholder="Detalla lo sucedido aquí..."></textarea>
+      <textarea [(ngModel)]="descripcion" placeholder="Detalla lo sucedido aquí..." rows="4"></textarea>
     </div>
 
-    <ion-button class="submit-btn" expand="block" (click)="enviarReporte()">
+    <ion-button class="submit-btn" expand="block" (click)="enviarReporte()" [disabled]="!tipoIncidencia || enviando">
       <ion-icon name="send-outline" slot="start"></ion-icon>
-      ENVIAR REPORTE
+      {{ enviando ? 'ENVIANDO...' : 'ENVIAR REPORTE' }}
     </ion-button>
 
   </div>

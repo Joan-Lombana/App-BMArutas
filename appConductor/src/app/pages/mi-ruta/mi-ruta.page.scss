@@ -1,5 +1,5 @@
 .dark-map-content {
-  --background: #000000;
+  --background: var(--bg-main);
   --padding-top: 0;
   --padding-bottom: 0;
   --padding-start: 0;
@@ -33,7 +33,7 @@
   position: fixed;
   inset: 0;
   z-index: 10;
-  background: #0a0f24;
+  background: var(--bg-main);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,7 +52,7 @@
     position: absolute;
     inset: -12px;
     border-radius: 50%;
-    border: 1.5px solid rgba(0, 229, 255, 0.15);
+    border: 1.5px solid rgba(150, 180, 234, 0.15); /* Soft primary tint */
     animation: pulse-ring 2s ease-out infinite;
   }
 
@@ -62,7 +62,7 @@
     position: absolute;
     inset: -24px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 229, 255, 0.07);
+    border: 1px solid rgba(150, 180, 234, 0.07); /* Soft primary tint */
     animation: pulse-ring 2s ease-out 0.5s infinite;
   }
 }
@@ -71,7 +71,7 @@
   font-size: 88px;
   display: block;
   animation: globe-spin 3s linear infinite;
-  filter: drop-shadow(0 0 24px rgba(0, 229, 255, 0.4));
+  filter: drop-shadow(0 0 24px rgba(150, 180, 234, 0.4)); /* primary drop shadow */
   line-height: 1;
 }
 
@@ -82,14 +82,14 @@
   gap: 6px;
 
   .loading-title {
-    color: #f1f5f9;
+    color: var(--text-main);
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.5px;
   }
 
   .loading-sub {
-    color: #00E5FF;
+    color: var(--primary);
     font-size: 12px;
     font-weight: 600;
     opacity: 0.8;
@@ -101,14 +101,14 @@
 .loading-bar-bg {
   width: 140px;
   height: 3px;
-  background: rgba(0, 229, 255, 0.1);
+  background: rgba(150, 180, 234, 0.1); /* primary tint */
   border-radius: 4px;
   overflow: hidden;
 
   .loading-bar-fill {
     height: 100%;
     width: 40%;
-    background: linear-gradient(90deg, transparent, #00E5FF, transparent);
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
     border-radius: 4px;
     animation: loading-sweep 1.8s ease-in-out infinite;
   }
@@ -136,13 +136,13 @@
 
 /* Etiquetas de paradas en el mapa (BMAR-181) */
 ::ng-deep .parada-label {
-  background: rgba(10, 15, 36, 0.85);
-  color: #00E5FF;
+  background: var(--bg-main);
+  color: var(--primary);
   font-size: 10px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 229, 255, 0.4);
+  border: 1px solid var(--primary);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -163,16 +163,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0a0f24;
+  background: var(--bg-main);
   border-radius: 28px;
   padding: 12px 12px 12px 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
 
   .brand {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #00E5FF;
+    color: var(--primary);
     font-weight: 800;
     font-size: 16px;
 
@@ -180,18 +181,19 @@
   }
 
   .timer-pill {
-    background: #111833;
+    background: var(--bg-card);
     padding: 10px 16px;
     border-radius: 20px;
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #f1f5f9;
+    color: var(--text-main);
     font-weight: 700;
     font-family: monospace;
     font-size: 15px;
+    border: 1px solid var(--border-color);
 
-    ion-icon { color: #00E5FF; }
+    ion-icon { color: var(--primary); }
   }
 }
 
@@ -203,9 +205,9 @@
   z-index: 20;
 
   .glass-fab {
-    --background: #111833;
-    --color: #f1f5f9;
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --background: var(--bg-card);
+    --color: var(--text-main);
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -229,9 +231,9 @@
 ::ng-deep .location-dot {
   width: 18px;
   height: 18px;
-  background-color: #00E5FF;
+  background-color: var(--primary);
   border-radius: 50%;
-  border: 3px solid #ffffff;
+  border: 3px solid var(--bg-card);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
@@ -240,7 +242,7 @@
   position: absolute;
   width: 40px;
   height: 40px;
-  background-color: rgba(0, 229, 255, 0.3);
+  background-color: rgba(150, 180, 234, 0.3); /* primary tint */
   border-radius: 50%;
   z-index: 1;
   animation: pulse-aura 2s infinite ease-out;
@@ -253,7 +255,7 @@
   height: 0;
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
-  border-bottom: 40px solid rgba(0, 229, 255, 0.2);
+  border-bottom: 40px solid rgba(150, 180, 234, 0.2); /* primary tint */
   top: -10px;
   /* El transform rotate() se usará desde TS para apuntar a donde mira el celular */
   transform-origin: bottom center;
@@ -269,9 +271,9 @@
 
 /* MODAL BOTTOM SHEET NATIVA */
 ion-modal.bottom-sheet-modal {
-  --background: #0a0f24;
+  --background: var(--bg-main);
   --border-radius: 36px;
-  --box-shadow: 0 4px 32px rgba(0, 0, 0, 0.6);
+  --box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
   
   /* Elevamos el modal físicamente por encima de la barra de tabs */
   &::part(content) {
@@ -282,7 +284,7 @@ ion-modal.bottom-sheet-modal {
   }
 
   &::part(handle) {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--border-color);
     width: 48px;
     height: 4px;
     margin-top: 12px;
@@ -307,7 +309,7 @@ ion-modal.bottom-sheet-modal {
     .route-info {
       .route-label {
         font-size: 10px;
-        color: #64748b;
+        color: var(--text-sec);
         font-weight: 800;
         letter-spacing: 1.5px;
         display: block;
@@ -317,7 +319,7 @@ ion-modal.bottom-sheet-modal {
         margin: 0;
         font-size: 20px;
         font-weight: 800;
-        color: #f1f5f9;
+        color: var(--text-main);
         text-transform: capitalize;
       }
     }
@@ -339,14 +341,14 @@ ion-modal.bottom-sheet-modal {
       }
 
       &.badge-active {
-        background: rgba(0, 229, 255, 0.15);
-        color: #00E5FF;
-        .badge-dot { background: #00E5FF; box-shadow: 0 0 8px #00E5FF; animation: pulse 1.5s infinite; }
+        background: var(--border-color);
+        color: var(--primary);
+        .badge-dot { background: var(--primary); box-shadow: 0 0 8px var(--primary); animation: pulse 1.5s infinite; }
       }
       &.badge-idle {
-        background: rgba(100, 116, 139, 0.15);
-        color: #64748b;
-        .badge-dot { background: #64748b; }
+        background: var(--border-color);
+        color: var(--text-sec);
+        .badge-dot { background: var(--text-sec); }
       }
     }
   }
@@ -359,31 +361,32 @@ ion-modal.bottom-sheet-modal {
     margin-bottom: 16px;
 
     .metric-card {
-      background: #111833;
+      background: var(--bg-card);
       border-radius: 16px;
       padding: 14px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
+      border: 1px solid var(--border-color);
 
       ion-icon {
         font-size: 18px;
-        color: #00E5FF;
+        color: var(--primary);
         margin-bottom: 2px;
       }
 
       .metric-val {
         font-size: 18px;
         font-weight: 800;
-        color: #f1f5f9;
+        color: var(--text-main);
         font-variant-numeric: tabular-nums;
-        &.gps-val { font-size: 14px; color: #00E5FF; }
+        &.gps-val { font-size: 14px; color: var(--primary); }
       }
 
       .metric-label {
         font-size: 10px;
-        color: #64748b;
+        color: var(--text-sec);
         font-weight: 700;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -393,26 +396,27 @@ ion-modal.bottom-sheet-modal {
 
   // Estado en reposo
   .idle-info {
-    background: #111833;
+    background: var(--bg-card);
     border-radius: 16px;
     padding: 20px;
     text-align: center;
     margin-bottom: 16px;
+    border: 1px solid var(--border-color);
 
     .idle-icon {
       font-size: 32px;
-      color: #334155;
+      color: var(--text-sec);
       display: block;
       margin-bottom: 8px;
     }
 
     p {
       margin: 0;
-      color: #64748b;
+      color: var(--text-sec);
       font-size: 13px;
       line-height: 1.5;
 
-      strong { color: #00E5FF; }
+      strong { color: var(--primary); }
     }
   }
 
@@ -438,16 +442,17 @@ ion-modal.bottom-sheet-modal {
       ion-icon { font-size: 18px; }
 
       &.btn-check {
-        background: linear-gradient(135deg, #00E5FF, #0ea5e9);
-        color: #0a0f24;
-        box-shadow: 0 6px 16px rgba(0, 229, 255, 0.2);
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 6px 16px rgba(150, 180, 234, 0.3);
       }
 
       &.btn-pause {
-        background: #111833;
-        color: #f1f5f9;
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
 
-        ion-icon { color: #94a3b8; }
+        ion-icon { color: var(--text-sec); }
       }
     }
   }
@@ -482,8 +487,8 @@ ion-modal.bottom-sheet-modal {
   z-index: 20;
 
   .glass-fab {
-    --background: #111833;
-    --color: #f1f5f9;
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --background: var(--bg-card);
+    --color: var(--text-main);
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 }

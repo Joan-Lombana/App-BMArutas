@@ -57,22 +57,17 @@ export class MisRutasPage implements OnInit {
 
   cargarRutaAsignada() {
     this.cargando = true;
-    this.rutaService.obtenerRecorridoAsignado().subscribe({
-      next: (resultado) => {
-        if (resultado) {
-          const { recorrido, ruta } = resultado;
-          this.rutas = [{
-            codigo: ruta?.nombre_ruta || 'Sin código',
-            zona: 'Buenaventura',
-            horarioInicio: '06:00',
-            horarioFin: '14:00',
-            estado: this.mapearEstado(recorrido?.estado),
-            _ruta: ruta,
-            _recorrido: recorrido
-          }];
-        } else {
-          this.rutas = [];
-        }
+    this.rutaService.obtenerTodosLosRecorridosAsignados().subscribe({
+      next: (resultados) => {
+        this.rutas = resultados.map(({ recorrido, ruta }) => ({
+          codigo: ruta?.nombre_ruta || 'Sin código',
+          zona: 'Buenaventura',
+          horarioInicio: '06:00',
+          horarioFin: '14:00',
+          estado: this.mapearEstado(recorrido?.estado),
+          _ruta: ruta,
+          _recorrido: recorrido
+        }));
         this.cargando = false;
       },
       error: () => {

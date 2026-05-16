@@ -1,5 +1,5 @@
 .dashboard-content {
-  --background: #0a0f24;
+  --background: var(--bg-main);
 }
 
 .main-wrapper {
@@ -18,10 +18,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #00E5FF;
-    font-weight: 800;
-    font-size: 18px;
-    letter-spacing: -0.5px;
+    color: var(--primary);
+    font-family: 'Peace Sans', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: 0.5px;
     
     ion-icon {
       font-size: 24px;
@@ -31,20 +32,20 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background: rgba(100, 116, 139, 0.15);
+      background: var(--border-color);
       padding: 2px 8px;
       border-radius: 6px;
       margin-top: 4px;
       
       ion-icon {
         font-size: 10px;
-        color: #94a3b8;
+        color: var(--text-sec);
       }
       
       span {
         font-size: 9px;
         font-weight: 800;
-        color: #94a3b8;
+        color: var(--text-sec);
         letter-spacing: 1px;
       }
     }
@@ -54,15 +55,15 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid rgba(0, 229, 255, 0.3);
-    background: #111833;
+    border: 2px solid var(--primary);
+    background: var(--bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
 
     ion-icon {
       font-size: 20px;
-      color: rgba(0, 229, 255, 0.5);
+      color: var(--primary);
     }
   }
 }
@@ -71,7 +72,7 @@
   margin-bottom: 24px;
   
   .subtitle {
-    color: #64748b;
+    color: var(--text-sec);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.5px;
@@ -79,7 +80,7 @@
   }
   
   .title {
-    color: #ffffff;
+    color: var(--text-main);
     font-size: 28px;
     font-weight: 800;
     margin: 0;
@@ -92,24 +93,25 @@
 
   .greeting-text {
     margin: 0;
-    font-size: 26px;
-    font-weight: 800;
-    color: #f1f5f9;
-    letter-spacing: -0.5px;
+    font-size: 28px;
+    font-weight: 400;
+    font-family: 'Peace Sans', sans-serif;
+    color: var(--text-main);
+    letter-spacing: 0.5px;
 
     .user-name {
-      color: #00E5FF;
-      font-weight: 800;
+      color: var(--primary);
+      font-family: 'Peace Sans', sans-serif;
     }
   }
 }
 
 .route-card-stitch {
-  background: #111833;
+  background: var(--bg-card);
   border-radius: 28px;
   padding: 24px;
   margin-bottom: 32px;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid var(--border-color);
 
   .status-pill {
     display: inline-block;
@@ -121,15 +123,15 @@
     margin-bottom: 16px;
     
     &.status-wait {
-      background: rgba(0, 229, 255, 0.15);
-      color: #00E5FF;
+      background: var(--border-color);
+      color: var(--primary);
     }
   }
 
   .route-title {
     font-size: 24px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: var(--text-main);
     margin: 0 0 8px 0;
     line-height: 1.2;
   }
@@ -138,13 +140,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #94a3b8;
+    color: var(--text-sec);
     font-weight: 500;
     font-size: 14px;
     margin-bottom: 24px;
     
     ion-icon {
-      color: #00E5FF;
+      color: var(--primary);
     }
   }
 
@@ -155,7 +157,7 @@
 
     .stat-box {
       flex: 1;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--border-color);
       border-radius: 16px;
       padding: 16px;
       display: flex;
@@ -164,33 +166,33 @@
 
       .label {
         font-size: 10px;
-        color: #64748b;
+        color: var(--text-sec);
         font-weight: 700;
         letter-spacing: 1px;
       }
       .val {
         font-size: 16px;
-        color: #f1f5f9;
+        color: var(--text-main);
         font-weight: 700;
       }
     }
   }
 
   .stitch-play-btn {
-    --background: #00E5FF;
-    --color: #0a0f24;
+    --background: var(--primary);
+    --color: #FFFFFF;
     --border-radius: 24px;
     font-weight: 800;
     font-size: 15px;
     height: 56px;
     letter-spacing: 0.5px;
     margin: 0;
-    --box-shadow: 0 8px 16px rgba(0, 229, 255, 0.2);
+    --box-shadow: 0 8px 16px rgba(150, 180, 234, 0.2);
   }
 }
 
 .section-title {
-  color: #64748b;
+  color: var(--text-sec);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -204,14 +206,14 @@
 
   .action-btn {
     flex: 1;
-    background: #111833;
+    background: var(--bg-card);
     border-radius: 20px;
     padding: 20px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    border: 1px solid rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
 
     .icon-bulb {
       width: 40px;
@@ -224,13 +226,13 @@
 
       &.icon-orange { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
       &.icon-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-      &.icon-green { background: rgba(0, 229, 255, 0.15); color: #00E5FF; }
+      &.icon-green { background: var(--border-color); color: var(--primary); }
     }
 
     span {
       font-size: 10px;
       font-weight: 800;
-      color: #94a3b8;
+      color: var(--text-sec);
       letter-spacing: 0.5px;
     }
     
@@ -241,13 +243,13 @@
 }
 
 .goal-card {
-  background: #111833;
+  background: var(--bg-card);
   border-radius: 24px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid var(--border-color);
 
   .circular-progress {
     width: 50px;
@@ -262,7 +264,7 @@
 
     .circle-bg {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.05);
+      stroke: var(--border-color);
       stroke-width: 3.8;
     }
 
@@ -274,11 +276,11 @@
     }
 
     .green .circle {
-      stroke: #00E5FF;
+      stroke: var(--primary);
     }
 
     .percentage {
-      fill: #00E5FF;
+      fill: var(--primary);
       font-family: inherit;
       font-weight: 700;
       font-size: 10px;
@@ -294,19 +296,19 @@
 
     .label {
       font-size: 10px;
-      color: #64748b;
+      color: var(--text-sec);
       font-weight: 700;
       letter-spacing: 1px;
     }
     .val {
       font-size: 16px;
-      color: #f1f5f9;
+      color: var(--text-main);
       font-weight: 700;
     }
   }
 
   .forward-icon {
-    color: #64748b;
+    color: var(--text-sec);
     font-size: 20px;
   }
 }

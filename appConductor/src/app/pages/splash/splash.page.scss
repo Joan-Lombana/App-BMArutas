@@ -39,19 +39,18 @@ ion-content {
   }
 
   .brand-name {
-    font-family: 'Space Mono', monospace;
+    font-family: 'Peace Sans', sans-serif;
     font-size: 42px;
-    font-weight: 700;
+    font-weight: 400;
     color: #ffffff;
     margin: 0;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   .brand-sub {
-    font-family: 'Space Mono', monospace;
+    font-family: 'Open Sauce One', sans-serif;
     font-size: 13px;
-    font-weight: 400;
+    font-weight: 500;
     color: #00E5FF;
     letter-spacing: 6px;
     text-transform: uppercase;
@@ -75,14 +74,15 @@ ion-content {
   }
 
   .start-btn {
-    --background: #00E5FF; // Electric Cyan
-    --background-activated: #0ea5e9; // Electric Blue oscuro
-    --color: #0a0f24; // Texto oscuro para mayor contraste
-    --border-radius: 30px; // Estilo pastilla igual al login
+    --background: #00E5FF;
+    --background-activated: #0ea5e9;
+    --color: #0a0f24;
+    --border-radius: 30px;
     height: 60px;
-    font-size: 17px;
-    font-weight: 700;
-    --box-shadow: 0 8px 24px rgba(0, 229, 255, 0.35); // IMPORTANTE: usar variable de ionic para la sombra
+    font-size: 18px;
+    font-weight: 400;
+    font-family: 'Peace Sans', sans-serif;
+    --box-shadow: 0 8px 24px rgba(0, 229, 255, 0.35);
   }
 }
 

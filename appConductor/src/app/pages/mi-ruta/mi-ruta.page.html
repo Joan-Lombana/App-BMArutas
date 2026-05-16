@@ -56,12 +56,12 @@
           </div>
           <div class="status-badge" [class.badge-active]="recorridoActivo" [class.badge-idle]="!recorridoActivo">
             <span class="badge-dot"></span>
-            {{ recorridoActivo ? 'EN VIVO' : (recorridoIdActual ? 'LISTO' : 'SIN ASIGNAR') }}
+            {{ recorridoActivo ? 'EN VIVO' : (recorridoIdActual ? (tiempoInicio ? 'PAUSADO' : 'LISTO') : 'SIN ASIGNAR') }}
           </div>
         </div>
 
-        <!-- Métricas en tiempo real (visibles cuando activo) -->
-        @if (recorridoActivo) {
+        <!-- Métricas en tiempo real (visibles si está activo o pausado) -->
+        @if (recorridoActivo || tiempoInicio) {
           <div class="metrics-grid">
             <div class="metric-card">
               <ion-icon name="timer-outline"></ion-icon>
@@ -90,8 +90,8 @@
           </div>
         }
 
-        <!-- Estado cuando NO está activo -->
-        @if (!recorridoActivo) {
+        <!-- Estado cuando NO ha iniciado -->
+        @if (!recorridoActivo && !tiempoInicio) {
           <div class="idle-info">
             <ion-icon name="map-outline" class="idle-icon"></ion-icon>
             @if (recorridoIdActual) {
@@ -105,9 +105,9 @@
 
         <!-- Botones de acción -->
         <div class="actions-row-stitch">
-          <button class="btn-check" (click)="toggleRecorrido()" [disabled]="!recorridoIdActual">
+          <button class="btn-check" (click)="toggleRecorrido()" [disabled]="!recorridoIdActual" [ngClass]="{'btn-paused': !recorridoActivo && tiempoInicio}">
             <ion-icon [name]="recorridoActivo ? 'pause-circle' : 'play-circle'"></ion-icon>
-            {{ recorridoActivo ? 'PAUSAR' : 'INICIAR' }}
+            {{ recorridoActivo ? 'PAUSAR' : (tiempoInicio ? 'REANUDAR' : 'INICIAR') }}
           </button>
           <button class="btn-pause" (click)="centrarEnConductor()">
             <ion-icon name="locate"></ion-icon>

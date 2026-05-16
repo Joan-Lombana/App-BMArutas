@@ -11,6 +11,7 @@ import { Auth } from '../../services/auth';
 import { RutaService, Ruta } from '../../services/ruta.service';
 import { OfflineService } from '../../services/offline.service';
 import { inject, effect } from '@angular/core';
+import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,6 +25,7 @@ export class DashboardPage implements OnInit {
   private auth = inject(Auth);
   private rutaService = inject(RutaService);
   public offlineService = inject(OfflineService); // ✅ Inyectado para UI
+  private webSocketService = inject(WebSocketService);
 
   usuarioNombre = '';
   
@@ -31,6 +33,9 @@ export class DashboardPage implements OnInit {
   rutaAsignada: Ruta | null = null;
   recorridoAsignado: any | null = null; // El registro de recorrido del backend
   cargandoRuta = true;
+  
+  // Progreso del día
+  progreso = { total: 0, completadas: 0, porcentaje: 0 };
 
   constructor() {
     addIcons({ notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, playCircleOutline, timeOutline, headsetOutline, playSharp, carSportOutline, chevronForwardOutline, calendarOutline, cloudOfflineOutline, busOutline, personOutline });
@@ -50,6 +55,13 @@ export class DashboardPage implements OnInit {
     }
 
     this.cargarRutaAsignada();
+
+    // Escuchar cuando el admin nos asigne una ruta o cambie su estado
+    this.webSocketService.onEstadoRecorrido((data: any) => {
+      console.log('🔄 Notificación de WebSocket recibida:', data);
+      // Recargar nuestra ruta si ocurre un evento de Programada o Cancelada
+      this.cargarRutaAsignada();
+    });
   }
 
   cargarRutaAsignada() {
@@ -72,6 +84,11 @@ export class DashboardPage implements OnInit {
           this.recorridoAsignado = null;
         }
         this.cargandoRuta = false;
+        
+        // Cargar progreso justo después
+        this.rutaService.obtenerProgresoDelDia().subscribe(p => {
+          this.progreso = p;
+        });
       },
       error: () => {
         this.rutaAsignada = null;

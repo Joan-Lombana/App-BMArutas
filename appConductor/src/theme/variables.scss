@@ -1,18 +1,42 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+// =========================================
+// TIPOGRAFIA GLOBAL — Open Sauce One
+// =========================================
 
-// =========================================
-// TIPOGRAFÍA GLOBAL — Space Mono
-// Aplica la fuente técnica/operativa a toda
-// la app mediante la variable de Ionic
-// =========================================
+/* MODO LUZ (Por defecto - Paleta 1) */
 :root {
-  --ion-font-family: 'Space Mono', monospace;
-  --ion-background-color: #0a0f24;
-  --ion-text-color: #f1f5f9;
+  --ion-font-family: 'Open Sauce One', sans-serif;
+  
+  --bg-main: #F2F2F2;
+  --bg-card: #FFFFFF;
+  --primary: #96B4EA;
+  --text-main: #5D730D;
+  --text-sec: #808f4c;
+  --border-color: rgba(93, 115, 13, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.55);
+
+  --ion-background-color: var(--bg-main);
+  --ion-text-color: var(--text-main);
 }
 
-// Aplicar a absolutamente todos los elementos HTML nativos y componentes
-* {
-  font-family: 'Space Mono', monospace !important;
+/* MODO OSCURO (Adaptación) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-main: #161B22;
+    --bg-card: #21262d;
+    --primary: #96B4EA;
+    --text-main: #F2F2F2;
+    --text-sec: #9eaab5;
+    --border-color: rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(22, 27, 34, 0.55);
+    
+    --ion-background-color: var(--bg-main);
+    --ion-text-color: var(--text-main);
+  }
+}
+
+body,
+ion-app {
+  font-family: 'Open Sauce One', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }

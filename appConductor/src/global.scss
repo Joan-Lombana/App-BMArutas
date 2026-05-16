@@ -36,10 +36,38 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+/* Open Sauce One — tipografia de cuerpo */
+@font-face {
+  font-family: 'Open Sauce One';
+  src: url('assets/fonts/OpenSauceOne-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sauce One';
+  src: url('assets/fonts/OpenSauceOne-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sauce One';
+  src: url('assets/fonts/OpenSauceOne-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Peace Sans — tipografia expresiva para titulos */
+@font-face {
+  font-family: 'Peace Sans';
+  src: url('assets/fonts/PeaceSans.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
 
 :root {
-  --ion-font-family: 'Space Mono', monospace;
+  --ion-font-family: 'Open Sauce One', sans-serif;
+  --font-display: 'Peace Sans', sans-serif;
+  --font-body: 'Open Sauce One', sans-serif;
 }
 
 /* =========================================
@@ -48,11 +76,13 @@
    el Shadow DOM de los componentes Ionic
    ========================================= */
 
-/* Contenedor de la barra - píldora flotante */
+/* Contenedor de la barra - pildora flotante glassmorphism */
 ion-tab-bar.floating-pill-tabs {
-  --background: #111833;
+  --background: transparent;
   --border: none;
-  background: #111833 !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   position: absolute;
   bottom: 16px;
   left: 20px;
@@ -60,18 +90,18 @@ ion-tab-bar.floating-pill-tabs {
   width: auto;
   height: 62px;
   border-radius: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   padding: 0 8px;
 }
 
-/* Cada botón de pestaña */
+/* Cada boton de pestana */
 ion-tab-bar.floating-pill-tabs ion-tab-button {
   --background: transparent;
   --background-focused: transparent;
   --background-focused-opacity: 0;
-  --color: #475569;
-  --color-selected: #00E5FF;
+  --color: var(--text-sec);
+  --color-selected: var(--primary);
   --padding-top: 0;
   --padding-bottom: 0;
   border-radius: 24px;
@@ -86,24 +116,24 @@ ion-tab-bar.floating-pill-tabs ion-tab-button {
   }
 }
 
-/* Ícono */
+/* Icono */
 ion-tab-bar.floating-pill-tabs ion-tab-button ion-icon {
   font-size: 20px;
   margin-bottom: 3px;
 }
 
-/* Label debajo del ícono */
+/* Label debajo del icono */
 ion-tab-bar.floating-pill-tabs ion-tab-button ion-label {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.3px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Open Sauce One', sans-serif;
 }
 
-/* Pestaña SELECCIONADA */
+/* Pestana SELECCIONADA */
 ion-tab-bar.floating-pill-tabs ion-tab-button.tab-selected {
-  --color: #00E5FF;
-  background: rgba(0, 229, 255, 0.1) !important;
+  --color: var(--primary);
+  background: transparent !important;
   border-radius: 24px;
 }
 
@@ -118,10 +148,66 @@ ion-content {
   --padding-bottom: 100px;
 }
 
-/* Excepción: la página del mapa no necesita
+/* Excepcion: la pagina del mapa no necesita
    ese padding porque usa position: fixed */
 app-mi-ruta ion-content {
   --padding-bottom: 0 !important;
 }
 
+/* =========================================
+   ALERTA DE CONFIRMACION - FINALIZAR RUTA
+   ========================================= */
 
+.confirm-alert {
+  --background: var(--bg-card);
+  --backdrop-opacity: 0.7;
+
+  .alert-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+  }
+
+  .alert-head {
+    padding-bottom: 4px;
+  }
+
+  .alert-title {
+    color: var(--text-main);
+    font-family: 'Peace Sans', sans-serif;
+    font-size: 20px;
+  }
+
+  .alert-message {
+    color: var(--text-sec);
+    font-family: 'Open Sauce One', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .alert-button-group {
+    padding: 8px 12px 16px;
+    gap: 8px;
+    flex-direction: row !important;
+  }
+
+  .alert-btn-cancel {
+    --color: var(--text-sec);
+    background: var(--border-color);
+    border-radius: 12px;
+    font-family: 'Open Sauce One', sans-serif;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .alert-btn-confirm {
+    --color: var(--bg-card);
+    background: #ef4444;
+    border-radius: 12px;
+    font-family: 'Peace Sans', sans-serif;
+    font-size: 16px;
+    color: #ffffff !important;
+    flex: 1;
+  }
+}

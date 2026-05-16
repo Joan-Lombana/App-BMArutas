@@ -86,32 +86,92 @@ export class RutaService {
       .get<any[]>(`${this.apiUrl}/recorridos/local`, this.auth.getAuthHeaders())
       .pipe(
         catchError((err) => {
-          console.warn('⚠️ No se pudo obtener recorridos del backend.');
+          console.warn('No se pudo obtener recorridos del backend.');
           return of([]);
         }),
         map((recorridos: any[]) => {
           if (!recorridos || recorridos.length === 0) return null;
-          // Filtrar por conductor_id y estado activo/programado
           const miRecorrido = recorridos.find(
             r => r.conductor_id === conductorId &&
             (r.estado === 'Activa' || r.estado === 'Programada' || r.estado === 'Pausado')
           ) ?? null;
-          console.log('🔍 Recorridos del sistema:', recorridos.length, '| Mi recorrido:', miRecorrido);
           return miRecorrido;
         }),
         switchMap((recorrido: any | null) => {
           if (!recorrido) return of(null);
-          // Traer TODAS las rutas y buscar la que corresponde (evita el bug del /rutas/:id)
           return this.obtenerRutas().pipe(
             map((rutas: Ruta[]) => {
               const ruta = rutas.find(r => r.id === recorrido.ruta_id) ?? null;
-              console.log('🗺 Ruta encontrada para recorrido:', ruta?.nombre_ruta ?? 'no encontrada');
               return ruta ? { recorrido, ruta } : null;
             })
           );
         })
       );
   }
+
+  // Devuelve TODOS los recorridos activos/programados asignados al conductor.
+  obtenerTodosLosRecorridosAsignados(): Observable<any[]> {
+    const user = this.auth.currentUser();
+    const conductorId = user?.id;
+
+    return this.http
+      .get<any[]>(`${this.apiUrl}/recorridos/local`, this.auth.getAuthHeaders())
+      .pipe(
+        catchError(() => {
+          console.warn('No se pudo obtener recorridos del backend.');
+          return of([]);
+        }),
+        map((recorridos: any[]) => {
+          if (!recorridos || recorridos.length === 0) return [];
+          return recorridos.filter(
+            r => r.conductor_id === conductorId &&
+            (r.estado === 'Activa' || r.estado === 'Programada' || r.estado === 'Pausado')
+          );
+        }),
+        switchMap((misRecorridos: any[]) => {
+          if (misRecorridos.length === 0) return of([]);
+          return this.obtenerRutas().pipe(
+            map((rutas: Ruta[]) =>
+              misRecorridos.map(recorrido => {
+                const ruta = rutas.find(r => r.id === recorrido.ruta_id) ?? null;
+                return ruta ? { recorrido, ruta } : null;
+              }).filter(Boolean)
+            )
+          );
+        })
+      );
+  }
+
+  // Calcula el progreso del día (rutas completadas vs total asignadas hoy)
+  obtenerProgresoDelDia(): Observable<{ total: number; completadas: number; porcentaje: number }> {
+    const user = this.auth.currentUser();
+    const conductorId = user?.id;
+
+    return this.http
+      .get<any[]>(`${this.apiUrl}/recorridos/local`, this.auth.getAuthHeaders())
+      .pipe(
+        catchError(() => of([])),
+        map((recorridos: any[]) => {
+          if (!recorridos || recorridos.length === 0) return { total: 0, completadas: 0, porcentaje: 0 };
+          
+          // Filtrar los del conductor para el día de hoy
+          const hoy = new Date().toISOString().split('T')[0];
+          const rutasDeHoy = recorridos.filter(r => {
+             const esConductor = r.conductor_id === conductorId;
+             // Si el backend tiene createdAt lo usamos, si no, lo incluimos (para la demo)
+             const fecha = r.createdAt ? new Date(r.createdAt).toISOString().split('T')[0] : hoy;
+             return esConductor && fecha === hoy;
+          });
+
+          const total = rutasDeHoy.length;
+          const completadas = rutasDeHoy.filter(r => r.estado === 'Finalizado').length;
+          const porcentaje = total > 0 ? Math.round((completadas / total) * 100) : 0;
+
+          return { total, completadas, porcentaje };
+        })
+      );
+  }
+
   // =============================================
   // RECORRIDOS (Nuevos Endpoints del Backend)
   // =============================================
@@ -133,6 +193,13 @@ export class RutaService {
    */
   iniciarRecorrido(recorridoId: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/recorridos/${recorridoId}/iniciar`, {}, this.auth.getAuthHeaders());
+  }
+
+  /**
+   * Pausa el recorrido actual.
+   */
+  pausarRecorrido(recorridoId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/recorridos/${recorridoId}/pausar`, {}, this.auth.getAuthHeaders());
   }
 
   /**
@@ -173,5 +240,18 @@ export class RutaService {
         );
       })
     );
+  }
+
+  // =============================================
+  // INCIDENCIAS (Pendiente Backend)
+  // =============================================
+  reportarIncidencia(recorridoId: string | null, payload: any): Observable<any> {
+    // El compañero de backend debe crear este endpoint
+    // POST /api/operativo/incidencias
+    return this.http.post(`${this.apiUrl}/incidencias`, {
+      recorrido_id: recorridoId,
+      ...payload,
+      timestamp: Date.now()
+    }, this.auth.getAuthHeaders());
   }
 }

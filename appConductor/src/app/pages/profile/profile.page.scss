@@ -1,5 +1,5 @@
 .dark-profile {
-  --background: #0a0f24;
+  --background: var(--bg-main);
 }
 
 .floating-header {
@@ -9,7 +9,7 @@
   background: transparent;
 
   ion-back-button {
-    --color: #00E5FF;
+    --color: var(--primary);
   }
 
   .header-titles {
@@ -19,7 +19,7 @@
       margin: 0;
       font-size: 18px;
       font-weight: 700;
-      color: #00E5FF;
+      color: var(--primary);
       padding-right: 48px; /* balance out back button */
     }
   }
@@ -43,16 +43,16 @@
     height: 100px;
     margin-bottom: 16px;
     border-radius: 50%;
-    border: 3px solid #00E5FF;
-    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.2);
-    background: #111833;
+    border: 3px solid var(--primary);
+    box-shadow: 0 8px 24px rgba(150, 180, 234, 0.2);
+    background: var(--bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
 
     .avatar-icon {
       font-size: 48px;
-      color: rgba(0, 229, 255, 0.5);
+      color: var(--primary);
     }
     
     .edit-avatar-btn {
@@ -62,8 +62,8 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #00E5FF;
-      color: #0a0f24;
+      background: var(--primary);
+      color: #FFFFFF;
       border: none;
       display: flex;
       align-items: center;
@@ -81,15 +81,15 @@
     margin: 0 0 4px;
     font-size: 24px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: var(--text-main);
   }
 
   .user-role {
     font-size: 12px;
     font-weight: 700;
-    color: #00E5FF;
+    color: var(--primary);
     letter-spacing: 2px;
-    background: rgba(0, 229, 255, 0.1);
+    background: rgba(150, 180, 234, 0.1);
     padding: 4px 12px;
     border-radius: 12px;
   }
@@ -102,20 +102,20 @@
   gap: 16px;
 
   .info-card {
-    background: #111833;
+    background: var(--bg-card);
     border-radius: 16px;
     padding: 16px;
     display: flex;
     align-items: center;
     gap: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
 
     .icon-box {
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      background: rgba(0, 229, 255, 0.1);
-      color: #00E5FF;
+      background: rgba(150, 180, 234, 0.1);
+      color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -130,7 +130,7 @@
 
       .label {
         font-size: 11px;
-        color: #64748b;
+        color: var(--text-sec);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -138,7 +138,7 @@
 
       .value {
         font-size: 15px;
-        color: #f1f5f9;
+        color: var(--text-main);
         font-weight: 600;
       }
     }

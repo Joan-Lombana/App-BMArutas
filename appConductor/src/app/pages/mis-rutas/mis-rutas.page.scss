@@ -1,5 +1,5 @@
 .mis-rutas-content {
-  --background: #0a0f24;
+  --background: var(--bg-main);
 }
 
 .wrapper {
@@ -24,14 +24,14 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #1e293b;
+      background: var(--bg-card);
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid rgba(0, 229, 255, 0.25);
+      border: 2px solid rgba(150, 180, 234, 0.25);
       ion-icon {
         font-size: 20px;
-        color: #94a3b8;
+        color: var(--text-sec);
       }
     }
 
@@ -41,7 +41,7 @@
       gap: 2px;
 
       .app-name {
-        color: #f1f5f9;
+        color: var(--text-main);
         font-weight: 800;
         font-size: 15px;
       }
@@ -50,20 +50,20 @@
         display: flex;
         align-items: center;
         gap: 4px;
-        background: #1e293b;
+        background: var(--border-color);
         padding: 2px 8px;
         border-radius: 12px;
         width: fit-content;
 
-        ion-icon { color: #94a3b8; font-size: 11px; }
-        span { color: #94a3b8; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+        ion-icon { color: var(--text-sec); font-size: 11px; }
+        span { color: var(--text-sec); font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
       }
     }
   }
 
   .notif-icon {
     font-size: 24px;
-    color: #94a3b8;
+    color: var(--text-sec);
   }
 }
 
@@ -75,14 +75,14 @@
     margin: 0 0 4px 0;
     font-size: 26px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: var(--text-main);
     letter-spacing: -0.5px;
   }
 
   .fecha {
     margin: 0;
     font-size: 13px;
-    color: #64748b;
+    color: var(--text-sec);
     font-weight: 500;
     text-transform: capitalize;
   }
@@ -91,7 +91,7 @@
 // --- LABELS REUTILIZABLES ---
 .label-small {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-sec);
   font-weight: 700;
   letter-spacing: 1px;
   display: block;
@@ -110,14 +110,15 @@
   .empty-icon {
     width: 64px;
     height: 64px;
-    background: #141d26;
+    background: var(--bg-card);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--border-color);
     ion-icon {
       font-size: 32px;
-      color: #334155;
+      color: var(--text-sec);
     }
   }
 
@@ -125,13 +126,13 @@
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: #475569;
+    color: var(--text-sec);
   }
 
   .empty-sub {
     margin: 0;
     font-size: 13px;
-    color: #334155;
+    color: var(--text-sec);
     line-height: 1.5;
   }
 }
@@ -145,10 +146,10 @@
 }
 
 .ruta-card {
-  background: #141d26;
+  background: var(--bg-card);
   border-radius: 20px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: transform 0.15s ease;
 
@@ -156,13 +157,13 @@
 
   // Variante ACTIVA — borde cyan sutil
   &--activa {
-    border-color: rgba(0, 229, 255, 0.2);
-    background: linear-gradient(135deg, #141d26 60%, rgba(0, 229, 255, 0.04));
+    border-color: rgba(150, 180, 234, 0.4);
+    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(150, 180, 234, 0.08));
   }
 
   // Variante ASIGNADA — borde blanco muy sutil
   &--asignada {
-    border-color: rgba(255, 255, 255, 0.07);
+    border-color: var(--border-color);
   }
 }
 
@@ -181,7 +182,7 @@
   .codigo {
     font-size: 22px;
     font-weight: 800;
-    color: #00E5FF;
+    color: var(--primary);
     letter-spacing: -0.5px;
   }
 }
@@ -198,13 +199,13 @@
   letter-spacing: 1px;
 
   &--activa {
-    background: rgba(0, 229, 255, 0.12);
-    color: #00E5FF;
+    background: rgba(150, 180, 234, 0.12);
+    color: var(--primary);
   }
 
   &--asignada {
-    background: rgba(100, 116, 139, 0.12);
-    color: #64748b;
+    background: var(--border-color);
+    color: var(--text-sec);
   }
 
   &--finalizada {
@@ -225,7 +226,7 @@
   margin: 4px 0 16px 0;
   font-size: 18px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-main);
   line-height: 1.2;
 }
 
@@ -238,16 +239,16 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #94a3b8;
+    color: var(--text-sec);
     font-size: 14px;
     font-weight: 500;
 
-    ion-icon { color: #64748b; font-size: 16px; }
+    ion-icon { color: var(--text-sec); font-size: 16px; }
   }
 
   .btn-continuar {
-    background: linear-gradient(135deg, #00E5FF, #0ea5e9);
-    color: #0a0f24;
+    background: var(--primary);
+    color: #FFFFFF;
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
@@ -262,21 +263,21 @@
 
   .arrow-icon {
     font-size: 20px;
-    color: #475569;
+    color: var(--text-sec);
   }
 
   .check-icon {
     font-size: 22px;
-    color: #00E5FF;
+    color: var(--primary);
   }
 }
 
 // --- RESUMEN DE JORNADA ---
 .jornada-card {
-  background: #141d26;
+  background: var(--bg-card);
   border-radius: 20px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
 
   .jornada-header {
     display: flex;
@@ -286,20 +287,20 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
-    color: #64748b;
+    color: var(--text-sec);
 
-    .pct { color: #94a3b8; }
+    .pct { color: var(--text-sec); }
   }
 
   .jornada-bar {
     height: 6px;
-    background: #1e293b;
+    background: var(--border-color);
     border-radius: 4px;
     margin-bottom: 20px;
 
     .jornada-fill {
       height: 100%;
-      background: linear-gradient(90deg, #ef4444, #f97316);
+      background: var(--primary);
       border-radius: 4px;
       transition: width 0.5s ease;
     }
@@ -317,9 +318,9 @@
       .stat-val {
         font-size: 22px;
         font-weight: 800;
-        color: #f1f5f9;
+        color: var(--text-main);
 
-        &.highlight { color: #f97316; }
+        &.highlight { color: var(--primary); }
       }
     }
   }

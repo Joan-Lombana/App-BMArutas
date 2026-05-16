@@ -1,7 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonFab, IonFabButton, IonIcon, IonModal, NavController, ToastController, ModalController } from '@ionic/angular/standalone';
+import { IonContent, IonFab, IonFabButton, IonIcon, IonModal, NavController, ToastController, AlertController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
 import { addIcons } from 'ionicons';
@@ -48,7 +48,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   private rutaService = inject(RutaService);
   private navCtrl = inject(NavController);
   private toastCtrl = inject(ToastController);
-  private modalCtrl = inject(ModalController);
+  private alertCtrl = inject(AlertController);
   private auth = inject(Auth);
 
   // Estado del mapa
@@ -68,6 +68,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   posicionActual: { lat: number; lng: number } | null = null;
   posicionesenviadas = 0;
   tiempoInicio: Date | null = null;
+  tiempoAcumulado = 0;
   tiempoTranscurrido = '00:00:00';
   private timerInterval: any = null;
 
@@ -103,7 +104,14 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         if (resultado) {
           this.recorridoIdActual = resultado.recorrido?.id ?? null;
           this.rutaCargada = resultado.ruta ?? null;
-          console.log('✅ Recorrido asignado:', this.recorridoIdActual, '| Ruta:', this.rutaCargada?.nombre_ruta);
+          this.recorridoActivo = resultado.recorrido?.estado === 'Activa';
+          
+          if (this.recorridoActivo || resultado.recorrido?.estado === 'Pausado') {
+            // Si ya estaba activo o pausado, le ponemos un tiempo inicio temporal para que no desaparezca la UI
+            if (!this.tiempoInicio) this.tiempoInicio = new Date();
+          }
+
+          console.log('✅ Recorrido asignado:', this.recorridoIdActual, '| Ruta:', this.rutaCargada?.nombre_ruta, '| Estado:', resultado.recorrido?.estado);
         } else {
           console.warn('⚠️ No hay recorrido asignado a este conductor.');
           this.rutaCargada = null;
@@ -349,9 +357,15 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
             this.mostrarToast('Transmitiendo ubicación.');
           }
         });
-        // Iniciar contador de tiempo
-        this.tiempoInicio = new Date();
-        this.posicionesenviadas = 0;
+        // Iniciar contador de tiempo si es la primera vez o reanudar
+        if (!this.tiempoInicio || this.tiempoAcumulado === 0) {
+          this.tiempoInicio = new Date();
+          this.posicionesenviadas = 0;
+        } else {
+          // Reanudar ajustando el tiempo de inicio
+          this.tiempoInicio = new Date(Date.now() - this.tiempoAcumulado);
+        }
+
         this.timerInterval = setInterval(() => {
           if (!this.tiempoInicio) return;
           const diff = Date.now() - this.tiempoInicio.getTime();
@@ -366,7 +380,18 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
       // Pausar
+      if (this.tiempoInicio) {
+        this.tiempoAcumulado = Date.now() - this.tiempoInicio.getTime();
+      }
       if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+      
+      if (this.recorridoIdActual) {
+        this.rutaService.pausarRecorrido(this.recorridoIdActual).subscribe({
+          next: () => console.log('⏸️ Recorrido pausado en backend'),
+          error: (err) => console.warn('⚠️ Error al pausar en backend', err)
+        });
+      }
+
       this.mostrarToast('Transmisión pausada.');
     }
   }
@@ -374,20 +399,45 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   async confirmarFinalizar() {
     if (!this.recorridoIdActual) return;
 
-    // Detener GPS y timer
-    if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
-    this.recorridoActivo = false;
+    const alert = await this.alertCtrl.create({
+      header: 'Finalizar Recorrido',
+      message: '¿Estás seguro de que deseas finalizar el recorrido? Esta acción no se puede deshacer.',
+      cssClass: 'confirm-alert',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'alert-btn-cancel'
+        },
+        {
+          text: 'Finalizar',
+          cssClass: 'alert-btn-confirm',
+          handler: () => {
+            if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+            this.recorridoActivo = false;
 
-    this.rutaService.finalizarRecorrido(this.recorridoIdActual).subscribe({
-      next: () => {
-        console.log('✅ Recorrido finalizado:', this.recorridoIdActual);
-        this.mostrarToast('Recorrido finalizado exitosamente.');
-        this.recorridoIdActual = null; // Deshabilitar botones
-      },
-      error: (err) => {
-        console.warn('⚠️ Error al finalizar (puede que el backend no lo soporte aun):', err?.error?.message || err.message);
-        this.mostrarToast('Recorrido marcado como finalizado localmente.');
-      }
+            this.rutaService.finalizarRecorrido(this.recorridoIdActual!).subscribe({
+              next: () => {
+                console.log('Recorrido finalizado:', this.recorridoIdActual);
+                this.mostrarToast('Recorrido finalizado exitosamente.');
+                this.recorridoIdActual = null;
+                this.tiempoInicio = null;
+                this.tiempoAcumulado = 0;
+                this.tiempoTranscurrido = '00:00:00';
+                this.posicionesenviadas = 0;
+              },
+              error: (err) => {
+                console.warn('Error al finalizar:', err?.error?.message || err.message);
+                this.mostrarToast('Recorrido marcado como finalizado localmente.');
+                this.tiempoInicio = null;
+                this.tiempoAcumulado = 0;
+              }
+            });
+          }
+        }
+      ]
     });
+
+    await alert.present();
   }
 }

@@ -55,6 +55,10 @@ export class MisRutasPage implements OnInit {
     this.cargarRutaAsignada();
   }
 
+  ionViewWillEnter() {
+    this.cargarRutaAsignada();
+  }
+
   cargarRutaAsignada() {
     this.cargando = true;
     this.rutaService.obtenerTodosLosRecorridosAsignados().subscribe({

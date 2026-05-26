@@ -2,17 +2,17 @@
 // TIPOGRAFIA GLOBAL — Open Sauce One
 // =========================================
 
-/* MODO LUZ (Por defecto - Paleta 1) */
+/* MODO LUZ (Mejor contraste) */
 :root {
   --ion-font-family: 'Open Sauce One', sans-serif;
   
-  --bg-main: #F2F2F2;
+  --bg-main: #F4F5F8;
   --bg-card: #FFFFFF;
-  --primary: #96B4EA;
-  --text-main: #5D730D;
-  --text-sec: #808f4c;
-  --border-color: rgba(93, 115, 13, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.55);
+  --primary: #2F80ED; /* Azul más oscuro para mejor contraste sobre blanco */
+  --text-main: #1F2937; /* Gris muy oscuro, casi negro */
+  --text-sec: #4B5563; /* Gris medio para textos secundarios */
+  --border-color: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.85);
 
   --ion-background-color: var(--bg-main);
   --ion-text-color: var(--text-main);

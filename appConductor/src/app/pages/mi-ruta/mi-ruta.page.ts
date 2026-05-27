@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonFab, IonFabButton, IonIcon, IonModal, NavController, ToastController, AlertController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { addIcons } from 'ionicons';
-import { locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline } from 'ionicons/icons';
+import { locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline, cameraOutline } from 'ionicons/icons';
 import { RutaService, Ruta } from '../../services/ruta.service';
 import { Auth } from '../../services/auth';
 import { WebSocketService } from '../../services/websocket.service';
@@ -91,8 +92,12 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     { coords: [3.8720, -77.0380], nombre: 'Punto Final', barrio: 'El Porvenir' },
   ];
 
+  // Estado de la cámara
+  tomandoFoto = false;
+  ultimaPosicionId: string | null = null;
+
   constructor() {
-    addIcons({ locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline });
+    addIcons({ locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline, cameraOutline });
   }
 
   ngOnInit() {
@@ -584,4 +589,86 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
     await alert.present();
   }
+
+  // ============================================================
+  // TOMAR Y SUBIR FOTO (Flujo de 2 pasos según guía técnica)
+  // ============================================================
+  async tomarFoto() {
+    if (!this.recorridoIdActual) {
+      this.mostrarToast('Debes tener un recorrido activo para tomar una foto.');
+      return;
+    }
+    if (!this.posicionActual) {
+      this.mostrarToast('Esperando señal GPS para georreferenciar la foto...');
+      return;
+    }
+
+    this.tomandoFoto = true;
+
+    try {
+      // 1️⃣ Registrar la posición actual en el backend y capturar el posicion_id
+      const respPosicion: any = await new Promise((resolve, reject) => {
+        this.rutaService.enviarPosicion(
+          this.recorridoIdActual!,
+          this.posicionActual!.lat,
+          this.posicionActual!.lng
+        ).subscribe({ next: resolve, error: reject });
+      });
+
+      const posicionId: string | null = respPosicion?.id ?? respPosicion?.posicion_id ?? null;
+
+      if (!posicionId) {
+        this.mostrarToast('No se pudo registrar la posición. Intenta de nuevo.');
+        this.tomandoFoto = false;
+        return;
+      }
+
+      this.ultimaPosicionId = posicionId;
+
+      // 2️⃣ Abrir la cámara con Capacitor Camera
+      const foto = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+        width: 512,
+        height: 512,
+      });
+
+      if (!foto.base64String) {
+        this.mostrarToast('No se capturó la imagen correctamente.');
+        this.tomandoFoto = false;
+        return;
+      }
+
+      const imagenBase64 = `data:image/jpeg;base64,${foto.base64String}`;
+
+      // 3️⃣ Subir la foto vinculada a la posición recién creada
+      this.rutaService.subirFotoPosicion(posicionId, imagenBase64).subscribe({
+        next: (resp) => {
+          if (resp?.status === 'success') {
+            console.log('📷 Foto subida exitosamente:', resp);
+            this.mostrarToast('📷 Foto registrada y vinculada al recorrido.');
+          } else {
+            this.mostrarToast('No se pudo confirmar la subida de la foto.');
+          }
+          this.tomandoFoto = false;
+        },
+        error: (err) => {
+          console.error('❌ Error al subir foto:', err);
+          this.mostrarToast('Error al subir la foto. Verifica la conexión e intenta de nuevo.');
+          this.tomandoFoto = false;
+        }
+      });
+
+    } catch (e: any) {
+      // El usuario canceló la cámara u ocurrió un error
+      if (e?.message !== 'User cancelled photos app') {
+        console.error('Error abriendo cámara:', e);
+        this.mostrarToast('No se pudo abrir la cámara.');
+      }
+      this.tomandoFoto = false;
+    }
+  }
 }
+

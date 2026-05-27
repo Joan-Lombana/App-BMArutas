@@ -115,6 +115,21 @@
           </button>
         </div>
 
+        <!-- Botón TOMAR FOTO (visible cuando hay recorrido asignado) -->
+        @if (recorridoIdActual) {
+          <button
+            class="btn-foto"
+            [disabled]="tomandoFoto"
+            (click)="tomarFoto()">
+            @if (tomandoFoto) {
+              <span class="spinner-sm"></span> Procesando...
+            } @else {
+              <ion-icon name="camera-outline"></ion-icon>
+              TOMAR FOTO
+            }
+          </button>
+        }
+
         <!-- Botón FINALIZAR (solo cuando hay recorrido asignado) -->
         @if (recorridoIdActual) {
           <button
@@ -124,6 +139,7 @@
             FINALIZAR RECORRIDO
           </button>
         }
+
 
       </ion-content>
     </ng-template>

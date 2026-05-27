@@ -1,2 +1,42 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+// =========================================
+// THEME VARIABLES FOR CIUDADANO APP
+// =========================================
+
+:root {
+  --ion-font-family: 'Open Sans', sans-serif;
+  
+  /* Light Mode */
+  --bg-main: #F4F5F8;
+  --bg-card: #FFFFFF;
+  --primary: #10B981; /* Green/Emerald for Ciudadano */
+  --text-main: #1F2937;
+  --text-sec: #4B5563;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+
+  --ion-background-color: var(--bg-main);
+  --ion-text-color: var(--text-main);
+  --ion-color-primary: var(--primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Mode */
+    --bg-main: #111827;
+    --bg-card: #1F2937;
+    --primary: #10B981;
+    --text-main: #F3F4F6;
+    --text-sec: #9CA3AF;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(17, 24, 39, 0.85);
+    
+    --ion-background-color: var(--bg-main);
+    --ion-text-color: var(--text-main);
+  }
+}
+
+body,
+ion-app {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}

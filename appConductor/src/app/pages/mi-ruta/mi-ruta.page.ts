@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonFab, IonFabButton, IonIcon, IonModal, NavController, ToastController, AlertController } from '@ionic/angular/standalone';
@@ -10,6 +10,7 @@ import { RutaService, Ruta } from '../../services/ruta.service';
 import { Auth } from '../../services/auth';
 import { WebSocketService } from '../../services/websocket.service';
 import { inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // Marcador personalizado estilo Google Maps para el conductor
 const conductorIcon = L.divIcon({
@@ -52,6 +53,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   private alertCtrl = inject(AlertController);
   private auth = inject(Auth);
   private ws = inject(WebSocketService);
+  private destroyRef = inject(DestroyRef);
 
   // Estado del mapa
   map!: L.Map;
@@ -93,7 +95,19 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     addIcons({ locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    const conductorId = this.auth.currentUser()?.id;
+
+    if (conductorId) {
+      this.ws.unirseConductor(conductorId);
+    }
+
+    this.ws.onRecorridoAsignado()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.cargarRecorridoAsignado();
+      });
+  }
 
   ionViewWillEnter() {
     this.cargarRecorridoAsignado();
@@ -134,7 +148,16 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         const recorridoAnterior = this.recorridoIdActual;
 
         if (resultado) {
-          this.recorridoIdActual = resultado.recorrido?.id ?? null;
+          const nuevoId = resultado.recorrido?.id ?? null;
+
+          if (recorridoAnterior && recorridoAnterior !== nuevoId) {
+            this.ws.salirRecorrido(recorridoAnterior);
+          }
+          if (nuevoId && nuevoId !== recorridoAnterior) {
+            this.ws.unirseRecorrido(nuevoId);
+          }
+
+          this.recorridoIdActual = nuevoId;
           this.rutaCargada = resultado.ruta ?? null;
           this.recorridoActivo = resultado.recorrido?.estado === 'Activa';
           
@@ -165,6 +188,8 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    const conductorId = this.auth.currentUser()?.id;
+    if (conductorId) this.ws.salirConductor(conductorId);
     if (this.recorridoIdActual) this.ws.salirRecorrido(this.recorridoIdActual);
     if (this.watchId) Geolocation.clearWatch({ id: this.watchId });
     if (this.timerInterval) clearInterval(this.timerInterval);

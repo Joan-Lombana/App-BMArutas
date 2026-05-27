@@ -10,7 +10,8 @@ import { notificationsOutline, mapOutline, warningOutline, chatbubbleOutline, pl
 import { Auth } from '../../services/auth';
 import { RutaService, Ruta } from '../../services/ruta.service';
 import { OfflineService } from '../../services/offline.service';
-import { inject, effect } from '@angular/core';
+import { inject, effect, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
@@ -26,6 +27,7 @@ export class DashboardPage implements OnInit {
   private rutaService = inject(RutaService);
   public offlineService = inject(OfflineService); // ✅ Inyectado para UI
   private webSocketService = inject(WebSocketService);
+  private destroyRef = inject(DestroyRef);
 
   usuarioNombre = '';
   
@@ -56,12 +58,21 @@ export class DashboardPage implements OnInit {
 
     this.cargarRutaAsignada();
 
-    // Escuchar cuando el admin nos asigne una ruta o cambie su estado
-    this.webSocketService.onEstadoRecorrido((data: any) => {
-      console.log('🔄 Notificación de WebSocket recibida:', data);
-      // Recargar nuestra ruta si ocurre un evento de Programada o Cancelada
-      this.cargarRutaAsignada();
-    });
+    // Escuchar cuando el admin asigne un recorrido nuevo
+    this.webSocketService.onRecorridoAsignado()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        console.log('📋 Nuevo recorrido asignado');
+        this.cargarRutaAsignada();
+      });
+
+    // Escuchar cuando cambie el estado del recorrido activo
+    this.webSocketService.onEstadoRecorrido()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data: any) => {
+        console.log('🔄 Notificación de WebSocket recibida:', data);
+        this.cargarRutaAsignada();
+      });
   }
 
   cargarRutaAsignada() {

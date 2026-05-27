@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, from, catchError, map, switchMap } from 'rxjs';
+import { Observable, of, from, catchError, map, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Auth } from './auth';
 import { OfflineService } from './offline.service';
@@ -254,4 +254,24 @@ export class RutaService {
       timestamp: Date.now()
     }, this.auth.getAuthHeaders());
   }
+
+  /**
+   * Sube una foto en Base64 vinculada a una posición GPS específica.
+   * Paso 2 del flujo de la guía técnica de fotos.
+   * POST /api/operativo/recorridos/posiciones/:posicion_id/imagen
+   */
+  subirFotoPosicion(posicionId: string, imagenBase64: string): Observable<any> {
+    const payload = { imagen: imagenBase64 };
+    return this.http.post(
+      `${this.apiUrl}/recorridos/posiciones/${posicionId}/imagen`,
+      payload,
+      this.auth.getAuthHeaders()
+    ).pipe(
+      catchError(err => {
+        console.warn('⚠️ No se pudo subir la foto al servidor:', err);
+        return throwError(() => err);
+      })
+    );
+  }
 }
+

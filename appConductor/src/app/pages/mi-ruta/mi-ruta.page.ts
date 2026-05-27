@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonFab, IonFabButton, IonIcon, IonModal, NavController, ToastController, AlertController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { addIcons } from 'ionicons';
-import { locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline } from 'ionicons/icons';
+import { locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline, cameraOutline } from 'ionicons/icons';
 import { RutaService, Ruta } from '../../services/ruta.service';
 import { Auth } from '../../services/auth';
 import { WebSocketService } from '../../services/websocket.service';
@@ -68,6 +69,12 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   recorridoActivo = false;
   recorridoIdActual: string | null = null;
 
+  // Guía hacia el inicio
+  inicioRutaLatLng: L.LatLng | null = null;
+  rutaHaciaInicio: L.Polyline | null = null;
+  distanciaAlInicio = 0;
+  private ultimaActualizacionRutaHaciaInicio = 0;
+
   // Datos GPS en tiempo real
   posicionActual: { lat: number; lng: number } | null = null;
   posicionesenviadas = 0;
@@ -85,8 +92,12 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     { coords: [3.8720, -77.0380], nombre: 'Punto Final', barrio: 'El Porvenir' },
   ];
 
+  // Estado de la cámara
+  tomandoFoto = false;
+  ultimaPosicionId: string | null = null;
+
   constructor() {
-    addIcons({ locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline });
+    addIcons({ locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline, cameraOutline });
   }
 
   ngOnInit() {
@@ -223,6 +234,10 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     const leafletCoords = tieneShape ? this.rutaService.geoJsonALeaflet(rawCoords) : [];
     const center: [number, number] = tieneShape ? leafletCoords[0] : centerFallback;
 
+    if (tieneShape) {
+      this.inicioRutaLatLng = L.latLng(leafletCoords[0][0], leafletCoords[0][1]);
+    }
+
     this.map = L.map(this.mapContainer.nativeElement, {
       zoomControl: false,
       tap: false
@@ -340,16 +355,84 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Actualiza la posición del marcador en el mapa
   actualizarMarcadorConductor(lat: number, lng: number) {
     if (!this.map) return;
 
+    const currentLatLng = L.latLng(lat, lng);
+
     if (!this.conductorMarker) {
-      this.conductorMarker = L.marker([lat, lng], { icon: conductorIcon, zIndexOffset: 1000 })
+      this.conductorMarker = L.marker(currentLatLng, { icon: conductorIcon, zIndexOffset: 1000 })
         .addTo(this.map)
         .bindPopup('📍 Tu posición actual');
     } else {
-      this.conductorMarker.setLatLng([lat, lng]);
+      this.conductorMarker.setLatLng(currentLatLng);
+    }
+
+    // Lógica para guiar hacia el inicio de la ruta si está lejos
+    if (this.inicioRutaLatLng && !this.recorridoActivo) {
+      this.distanciaAlInicio = currentLatLng.distanceTo(this.inicioRutaLatLng);
+      
+      // Si está a más de 80 metros, trazar ruta hacia el inicio
+      if (this.distanciaAlInicio > 80) {
+        this.trazarRutaHaciaInicio(currentLatLng, this.inicioRutaLatLng);
+      } else {
+        // Ya llegó al inicio
+        if (this.rutaHaciaInicio) {
+          this.rutaHaciaInicio.remove();
+          this.rutaHaciaInicio = null;
+          this.mostrarToast('¡Estás en la zona de inicio de tu ruta!');
+        }
+      }
+    } else if (this.recorridoActivo && this.rutaHaciaInicio) {
+      // Si ya inició el recorrido, quitamos la guía
+      this.rutaHaciaInicio.remove();
+      this.rutaHaciaInicio = null;
+    }
+  }
+
+  async trazarRutaHaciaInicio(origen: L.LatLng, destino: L.LatLng) {
+    if (!this.map) return;
+    const ahora = Date.now();
+    // Actualizar solo cada 15 segundos para no saturar OSRM
+    if (this.rutaHaciaInicio && (ahora - this.ultimaActualizacionRutaHaciaInicio < 15000)) {
+       return;
+    }
+    this.ultimaActualizacionRutaHaciaInicio = ahora;
+
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${origen.lng},${origen.lat};${destino.lng},${destino.lat}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        const coords = data.routes[0].geometry.coordinates;
+        const leafletCoords = coords.map((c: number[]) => [c[1], c[0]] as [number, number]);
+
+        if (this.rutaHaciaInicio) {
+          this.rutaHaciaInicio.setLatLngs(leafletCoords);
+        } else {
+          this.rutaHaciaInicio = L.polyline(leafletCoords, {
+            color: '#6366f1', // Indigo
+            weight: 5,
+            dashArray: '10, 10', // Línea punteada
+            opacity: 0.9,
+            lineJoin: 'round'
+          }).addTo(this.map);
+          this.rutaHaciaInicio.bindPopup('Camino hacia el inicio de la ruta');
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching OSRM route:', e);
+      // Fallback: linea recta si falla OSRM
+      if (!this.rutaHaciaInicio) {
+        this.rutaHaciaInicio = L.polyline([origen, destino], {
+            color: '#6366f1',
+            weight: 5,
+            dashArray: '10, 10',
+            opacity: 0.8
+        }).addTo(this.map);
+      } else {
+        this.rutaHaciaInicio.setLatLngs([origen, destino]);
+      }
     }
   }
 
@@ -506,4 +589,86 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
     await alert.present();
   }
+
+  // ============================================================
+  // TOMAR Y SUBIR FOTO (Flujo de 2 pasos según guía técnica)
+  // ============================================================
+  async tomarFoto() {
+    if (!this.recorridoIdActual) {
+      this.mostrarToast('Debes tener un recorrido activo para tomar una foto.');
+      return;
+    }
+    if (!this.posicionActual) {
+      this.mostrarToast('Esperando señal GPS para georreferenciar la foto...');
+      return;
+    }
+
+    this.tomandoFoto = true;
+
+    try {
+      // 1️⃣ Registrar la posición actual en el backend y capturar el posicion_id
+      const respPosicion: any = await new Promise((resolve, reject) => {
+        this.rutaService.enviarPosicion(
+          this.recorridoIdActual!,
+          this.posicionActual!.lat,
+          this.posicionActual!.lng
+        ).subscribe({ next: resolve, error: reject });
+      });
+
+      const posicionId: string | null = respPosicion?.id ?? respPosicion?.posicion_id ?? null;
+
+      if (!posicionId) {
+        this.mostrarToast('No se pudo registrar la posición. Intenta de nuevo.');
+        this.tomandoFoto = false;
+        return;
+      }
+
+      this.ultimaPosicionId = posicionId;
+
+      // 2️⃣ Abrir la cámara con Capacitor Camera
+      const foto = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+        width: 512,
+        height: 512,
+      });
+
+      if (!foto.base64String) {
+        this.mostrarToast('No se capturó la imagen correctamente.');
+        this.tomandoFoto = false;
+        return;
+      }
+
+      const imagenBase64 = `data:image/jpeg;base64,${foto.base64String}`;
+
+      // 3️⃣ Subir la foto vinculada a la posición recién creada
+      this.rutaService.subirFotoPosicion(posicionId, imagenBase64).subscribe({
+        next: (resp) => {
+          if (resp?.status === 'success') {
+            console.log('📷 Foto subida exitosamente:', resp);
+            this.mostrarToast('📷 Foto registrada y vinculada al recorrido.');
+          } else {
+            this.mostrarToast('No se pudo confirmar la subida de la foto.');
+          }
+          this.tomandoFoto = false;
+        },
+        error: (err) => {
+          console.error('❌ Error al subir foto:', err);
+          this.mostrarToast('Error al subir la foto. Verifica la conexión e intenta de nuevo.');
+          this.tomandoFoto = false;
+        }
+      });
+
+    } catch (e: any) {
+      // El usuario canceló la cámara u ocurrió un error
+      if (e?.message !== 'User cancelled photos app') {
+        console.error('Error abriendo cámara:', e);
+        this.mostrarToast('No se pudo abrir la cámara.');
+      }
+      this.tomandoFoto = false;
+    }
+  }
 }
+

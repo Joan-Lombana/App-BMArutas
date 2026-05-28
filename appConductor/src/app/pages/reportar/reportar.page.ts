@@ -85,10 +85,8 @@ export class ReportarPage implements OnInit {
       },
       error: async (err) => {
         this.enviando = false;
-        console.warn('Aviso: endpoint backend pendiente', err);
-        // Simulamos el éxito por ahora para la demo mientras el backend lo hace
-        await this.mostrarToast('✅ Reporte guardado localmente (Backend Pendiente)');
-        this.navCtrl.back();
+        const mensaje = err?.error?.message || 'Error al enviar el reporte';
+        await this.mostrarToast('⚠️ ' + mensaje);
       }
     });
   }

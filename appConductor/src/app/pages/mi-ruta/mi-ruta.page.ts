@@ -643,8 +643,11 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
       const imagenBase64 = `data:image/jpeg;base64,${foto.base64String}`;
 
+      // 2.5️⃣ Comprimir imagen para cumplir con límite de 5MB de la API externa
+      const imagenComprimida = await this.comprimirImagen(imagenBase64, 512, 0.85);
+
       // 3️⃣ Subir la foto vinculada a la posición recién creada
-      this.rutaService.subirFotoPosicion(posicionId, imagenBase64).subscribe({
+      this.rutaService.subirFotoPosicion(posicionId, imagenComprimida).subscribe({
         next: (resp) => {
           if (resp?.status === 'success') {
             console.log('📷 Foto subida exitosamente:', resp);
@@ -656,7 +659,8 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         },
         error: (err) => {
           console.error('❌ Error al subir foto:', err);
-          this.mostrarToast('Error al subir la foto. Verifica la conexión e intenta de nuevo.');
+          const mensaje = err?.error?.message || 'Error al subir la foto. Verifica la conexión e intenta de nuevo.';
+          this.mostrarToast('⚠️ ' + mensaje);
           this.tomandoFoto = false;
         }
       });
@@ -669,6 +673,36 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       }
       this.tomandoFoto = false;
     }
+  }
+
+  /**
+   * Redimensiona y comprime una imagen base64 para cumplir con el límite de 5MB.
+   * El lado mayor no superará maxLado px, preservando la proporción.
+   */
+  private comprimirImagen(base64: string, maxLado: number, calidad: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const ladoMayor = Math.max(width, height);
+
+        if (ladoMayor > maxLado) {
+          const ratio = maxLado / ladoMayor;
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve(canvas.toDataURL('image/jpeg', calidad));
+      };
+      img.onerror = () => reject(new Error('Error al cargar imagen para compresión'));
+      img.src = base64;
+    });
   }
 }
 

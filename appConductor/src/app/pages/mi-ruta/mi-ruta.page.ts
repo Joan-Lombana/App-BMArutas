@@ -124,7 +124,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngAfterViewInit() {
-    const MIN_LOADING_MS = 4000; // Mínimo tiempo que se ve el globo
+    const MIN_LOADING_MS = 1500; // Mínimo tiempo que se ve el globo
     const inicio = Date.now();
 
     this.cargarRecorridoAsignado(() => {

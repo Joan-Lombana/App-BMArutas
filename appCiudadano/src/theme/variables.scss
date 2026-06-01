@@ -1,38 +1,27 @@
 // =========================================
 // THEME VARIABLES FOR CIUDADANO APP
+// Misma paleta visual del dashboard de appConductor.
 // =========================================
 
 :root {
-  --ion-font-family: 'Open Sans', sans-serif;
-  
-  /* Light Mode */
-  --bg-main: #F4F5F8;
-  --bg-card: #FFFFFF;
-  --primary: #10B981; /* Green/Emerald for Ciudadano */
-  --text-main: #1F2937;
-  --text-sec: #4B5563;
-  --border-color: rgba(0, 0, 0, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  --ion-font-family: 'Open Sauce One', sans-serif;
+
+  --bg-main: #161B22;
+  --bg-card: #21262d;
+  --primary: #96B4EA;
+  --text-main: #F2F2F2;
+  --text-sec: #9eaab5;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(22, 27, 34, 0.82);
 
   --ion-background-color: var(--bg-main);
   --ion-text-color: var(--text-main);
   --ion-color-primary: var(--primary);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark Mode */
-    --bg-main: #111827;
-    --bg-card: #1F2937;
-    --primary: #10B981;
-    --text-main: #F3F4F6;
-    --text-sec: #9CA3AF;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --glass-bg: rgba(17, 24, 39, 0.85);
-    
-    --ion-background-color: var(--bg-main);
-    --ion-text-color: var(--text-main);
-  }
+  --ion-color-primary-contrast: var(--bg-main);
+  --ion-item-background: var(--bg-card);
+  --ion-toolbar-background: var(--bg-main);
+  --ion-card-background: var(--bg-card);
+  color-scheme: dark;
 }
 
 body,

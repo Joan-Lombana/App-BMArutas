@@ -1,0 +1,112 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="transparent">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Rutas</h1>
+        <p class="page-subtitle">{{ rutas().length }} rutas en la ciudad</p>
+      </div>
+    </div>
+  </ion-toolbar>
+  <ion-toolbar color="transparent">
+    <ion-searchbar
+      placeholder="Buscar ruta o barrio..."
+      (ionInput)="onBusqueda($event)"
+      animated="true"
+      class="custom-search">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="content-pad">
+
+    <!-- FILTROS -->
+    <div class="filter-row">
+      <button class="filter-chip" [class.active]="filtro() === 'todas'" (click)="setFiltro('todas')">
+        Todas
+      </button>
+      <button class="filter-chip green" [class.active]="filtro() === 'activas'" (click)="setFiltro('activas')">
+        Activas <span class="count">{{ totalActivas }}</span>
+      </button>
+      <button class="filter-chip" [class.active]="filtro() === 'inactivas'" (click)="setFiltro('inactivas')">
+        Inactivas <span class="count">{{ totalInactivas }}</span>
+      </button>
+    </div>
+
+    <!-- CARGANDO -->
+    @if (cargando()) {
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Cargando rutas...</p>
+      </div>
+    }
+
+    <!-- ACTIVAS AHORA -->
+    @if (rutasActivas().length > 0 && filtro() !== 'inactivas') {
+      <div class="section-label">ACTIVAS AHORA</div>
+      @for (ruta of rutasActivas(); track ruta.id) {
+        <div class="ruta-card activa">
+          <div class="ruta-num" [style.background]="ruta.color || '#96B4EA'">
+            {{ (ruta.id || '').toString().slice(-2) }}
+          </div>
+          <div class="ruta-body">
+            <div class="ruta-top">
+              <h3 class="ruta-name">{{ ruta.nombre_ruta || 'Ruta sin nombre' }}</h3>
+              <span class="badge activa">&#9679; Activa</span>
+            </div>
+            @if (ruta.descripcion) {
+              <p class="ruta-desc">{{ ruta.descripcion }}</p>
+            }
+            @if (ruta.paradas) {
+              <p class="ruta-meta">
+                <ion-icon name="location-outline"></ion-icon>
+                {{ ruta.paradas }} paradas
+                @if (ruta.frecuencia) { &middot; {{ ruta.frecuencia }} }
+              </p>
+            }
+            <button class="btn-mapa" (click)="verEnMapa(ruta)">
+              <ion-icon name="map-outline"></ion-icon>
+              Ver en mapa
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- INACTIVAS -->
+    @if (rutasInactivas().length > 0 && filtro() !== 'activas') {
+      <div class="section-label muted">INACTIVAS</div>
+      @for (ruta of rutasInactivas(); track ruta.id) {
+        <div class="ruta-card inactiva">
+          <div class="ruta-num inactiva">
+            {{ (ruta.id || '').toString().slice(-2) }}
+          </div>
+          <div class="ruta-body">
+            <div class="ruta-top">
+              <h3 class="ruta-name">{{ ruta.nombre_ruta || 'Ruta sin nombre' }}</h3>
+              <span class="badge inactiva">Inactiva</span>
+            </div>
+            @if (ruta.descripcion) {
+              <p class="ruta-desc">{{ ruta.descripcion }}</p>
+            }
+            <p class="ruta-meta muted">Sin camiones asignados</p>
+            <button class="btn-detalle" (click)="verEnMapa(ruta)">
+              Detalles
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- VACIO -->
+    @if (!cargando() && rutasFiltradas().length === 0) {
+      <div class="empty-state">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>No se encontraron rutas</p>
+      </div>
+    }
+
+  </div>
+  <div class="safe-bottom"></div>
+</ion-content>

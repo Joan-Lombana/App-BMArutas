@@ -1,0 +1,149 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="transparent">
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">Centro de Reportes</h1>
+      </div>
+      
+      <!-- SEGMENTED CONTROL TIPO iOS -->
+      <div class="custom-segment">
+        <button class="seg-btn" [class.active]="vistaActual() === 'nuevo'" (click)="cambiarVista('nuevo')">
+          Nuevo Reporte
+        </button>
+        <button class="seg-btn" [class.active]="vistaActual() === 'historial'" (click)="cambiarVista('historial')">
+          Mis Reportes
+        </button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="content-pad">
+
+    <!-- VISTA: NUEVO REPORTE -->
+    @if (vistaActual() === 'nuevo') {
+      <div class="fade-in-up">
+        
+        <p class="section-label">¿QUÉ ESTÁ SUCEDIENDO?</p>
+        <div class="grid-tipos">
+          @for (tipo of tiposRapidos; track tipo.valor) {
+            <div class="tipo-card"
+                 [class.selected]="tipoSeleccionado() === tipo.valor"
+                 (click)="seleccionarTipo(tipo.valor)">
+              <ion-icon [name]="tipo.icon" class="tipo-icon"></ion-icon>
+              <span>{{ tipo.label }}</span>
+              @if (tipoSeleccionado() === tipo.valor) {
+                <ion-icon name="checkmark-circle-outline" class="check-icon"></ion-icon>
+              }
+            </div>
+          }
+        </div>
+
+        <p class="section-label mt-4">EVIDENCIA Y UBICACIÓN</p>
+        <div class="row-media">
+          <!-- CARD FOTO -->
+          <div class="media-card" [class.active]="fotoBase64" (click)="adjuntarFoto()">
+            <div class="media-icon-wrap bg-blue">
+              <ion-icon name="camera-outline"></ion-icon>
+            </div>
+            <div class="media-content">
+              <h4>{{ fotoBase64 ? 'Foto Adjunta' : 'Tomar Foto' }}</h4>
+              <p>{{ fotoBase64 ? 'Toca para cambiar' : 'Opcional (5MB)' }}</p>
+            </div>
+            @if (fotoBase64) {
+              <div class="media-preview-wrap">
+                <img [src]="fotoBase64" class="media-preview" />
+                <button class="btn-remove-media" (click)="removerFoto(); $event.stopPropagation()">
+                  <ion-icon name="close-circle-outline"></ion-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- CARD GPS -->
+          <div class="media-card" [class.active]="latitud" (click)="usarUbicacion()">
+            <div class="media-icon-wrap bg-green">
+              <ion-icon name="location-outline"></ion-icon>
+            </div>
+            <div class="media-content">
+              <h4>{{ latitud ? 'GPS Capturado' : 'Ubicación' }}</h4>
+              <p>{{ latitud ? (latitud.toFixed(4) + ', ' + longitud?.toFixed(4)) : 'Toca para capturar' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="section-label mt-4">DETALLES ADICIONALES (OPCIONAL)</p>
+        <div class="textarea-card">
+          <ion-textarea
+            [(ngModel)]="descripcion"
+            placeholder="Escribe más detalles aquí..."
+            [autoGrow]="true"
+            rows="2">
+          </ion-textarea>
+        </div>
+
+        <p class="section-label mt-4">INFORMACIÓN DE CONTACTO (MÍNIMO UNO)</p>
+        <div class="contact-card">
+          <div class="input-row">
+            <ion-icon name="person-outline" class="input-icon"></ion-icon>
+            <input type="text" [(ngModel)]="nombreCiudadano" placeholder="Tu nombre o alias" class="custom-input" />
+          </div>
+          <div class="input-divider"></div>
+          <div class="input-row">
+            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+            <input type="email" [(ngModel)]="correoCiudadano" placeholder="Tu correo electrónico" class="custom-input" />
+          </div>
+        </div>
+
+        <button class="btn-submit" [disabled]="!tipoSeleccionado() || (!nombreCiudadano && !correoCiudadano) || enviando()" (click)="enviarReporte()">
+          @if (enviando()) {
+            <span class="spinner-sm"></span> Enviando...
+          } @else {
+            Enviar Reporte
+          }
+        </button>
+      </div>
+    }
+
+    <!-- VISTA: HISTORIAL (MIS REPORTES) -->
+    @if (vistaActual() === 'historial') {
+      <div class="fade-in-up">
+        
+        @if (misReportes().length === 0) {
+          <div class="empty-state">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <p>Aún no has enviado reportes.</p>
+          </div>
+        } @else {
+          <div class="timeline">
+            @for (reporte of misReportes(); track reporte.id) {
+              <div class="timeline-item">
+                <div class="timeline-line"></div>
+                
+                <div class="status-icon-wrap" [ngClass]="getEstadoBadge(reporte.estado).class">
+                  <ion-icon [name]="getEstadoBadge(reporte.estado).icon"></ion-icon>
+                </div>
+                
+                <div class="reporte-card">
+                  <div class="rep-header">
+                    <span class="rep-id">{{ reporte.id }}</span>
+                    <span class="rep-date">{{ reporte.fecha | date:'dd MMM, hh:mm a' }}</span>
+                  </div>
+                  <h3 class="rep-title">{{ reporte.tipo }}</h3>
+                  <p class="rep-address"><ion-icon name="location-outline"></ion-icon> {{ reporte.direccion }}</p>
+                  
+                  <div class="rep-status-chip" [ngClass]="getEstadoBadge(reporte.estado).class">
+                    {{ getEstadoBadge(reporte.estado).text }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+  <div class="safe-bottom"></div>
+</ion-content>

@@ -1,0 +1,224 @@
+/* ── BACKGROUND ──────────────────────────── */
+ion-content.bg-gray {
+  --background: #f8fafc;
+}
+
+/* ── HEADER ──────────────────────────────── */
+.page-header {
+  padding: 10px 0 6px;
+  background: white;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  color: #1e293b;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.15s;
+  &:active { transform: scale(0.9); }
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+/* ── CHIPS DE FILTRO ─────────────────────── */
+.filter-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.chip {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    &.red { background: #EF4444; }
+    &.blue { background: #3B82F6; }
+  }
+
+  &.active {
+    background: #1e293b;
+    color: white;
+    border-color: #1e293b;
+  }
+}
+
+/* ── CONTENIDO ───────────────────────────── */
+.content-pad {
+  padding: 16px;
+}
+
+/* ── TARJETAS DE ALERTA ──────────────────── */
+.alert-card {
+  display: flex;
+  gap: 12px;
+  background: white;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s;
+
+  &:active { transform: scale(0.985); }
+  &.unread { background: #f0fdf4; border-color: #d1fae5; }
+}
+
+.alert-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  ion-icon { font-size: 1.4rem; }
+}
+
+.alert-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.alert-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.alert-time {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.alert-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.alert-msg {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.unread-dot {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  background: #10B981;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(16,185,129,0.5);
+}
+
+/* ── ESTADO VACÍO ────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  ion-icon { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.4; }
+  p { font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.4; }
+}
+
+/* ── UTILIDADES ──────────────────────────── */
+.safe-bottom { height: 110px; }
+.fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.2,0.8,0.2,1); }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+ion-content.bg-gray {
+  --background: var(--bg-main);
+}
+
+.page-header {
+  background: var(--bg-main);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.back-btn,
+.page-title,
+.alert-title {
+  color: var(--text-main);
+}
+
+.chip,
+.alert-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-sec);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.chip.active {
+  background: var(--primary);
+  color: var(--bg-main);
+  border-color: var(--primary);
+}
+
+.alert-card.unread {
+  background: color-mix(in srgb, var(--bg-card) 88%, var(--primary));
+  border-color: rgba(150, 180, 234, 0.18);
+}
+
+.alert-time,
+.alert-msg,
+.empty-state {
+  color: var(--text-sec);
+}
+
+.unread-dot {
+  background: var(--primary);
+  box-shadow: 0 0 8px rgba(150, 180, 234, 0.45);
+}

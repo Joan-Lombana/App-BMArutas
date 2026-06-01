@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { startupSplashGuard } from './guards/startup-splash.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'tabs',
+    redirectTo: 'splash',
     pathMatch: 'full',
   },
   {
@@ -16,6 +17,7 @@ export const routes: Routes = [
   },
   {
     path: 'tabs',
+    canActivate: [startupSplashGuard],
     loadComponent: () => import('./tabs/tabs.component').then(m => m.TabsComponent),
     children: [
       {

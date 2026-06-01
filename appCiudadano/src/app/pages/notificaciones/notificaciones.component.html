@@ -1,0 +1,64 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="transparent">
+    <div class="page-header">
+      <div class="header-content">
+        <button class="back-btn" (click)="volver()">
+          <ion-icon name="arrow-back-outline"></ion-icon>
+        </button>
+        <h1 class="page-title">Centro de Alertas</h1>
+      </div>
+      
+      <!-- CHIPS DE FILTRO -->
+      <div class="filter-scroll">
+        <button class="chip" [class.active]="filtroActivo() === 'todas'" (click)="setFiltro('todas')">Todas</button>
+        <button class="chip" [class.active]="filtroActivo() === 'alerta'" (click)="setFiltro('alerta')">
+          <span class="dot red"></span> Urgentes
+        </button>
+        <button class="chip" [class.active]="filtroActivo() === 'info'" (click)="setFiltro('info')">
+          <span class="dot blue"></span> Avisos
+        </button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="bg-gray">
+  <div class="content-pad fade-in-up">
+
+    <!-- LISTA DE ALERTAS -->
+    @for (notif of notificacionesFiltradas(); track notif.id) {
+      <div class="alert-card" [class.unread]="!notif.leida" (click)="marcarComoLeida(notif)">
+        
+        <div class="alert-icon-wrap" [style.background]="getColor(notif.tipo) + '15'" [style.color]="getColor(notif.tipo)">
+          <ion-icon [name]="getIcono(notif.tipo)"></ion-icon>
+        </div>
+
+        <div class="alert-body">
+          <div class="alert-top">
+            <span class="alert-badge" [style.background]="getColor(notif.tipo) + '20'" [style.color]="getColor(notif.tipo)">
+              {{ getBadgeLabel(notif.tipo) }}
+            </span>
+            <span class="alert-time">{{ notif.fecha }}</span>
+          </div>
+          <h3 class="alert-title">{{ notif.titulo }}</h3>
+          <p class="alert-msg">{{ notif.mensaje }}</p>
+        </div>
+
+        @if (!notif.leida) {
+          <div class="unread-dot"></div>
+        }
+
+      </div>
+    }
+
+    <!-- ESTADO VACÍO -->
+    @if (notificacionesFiltradas().length === 0) {
+      <div class="empty-state">
+        <ion-icon name="notifications-off-outline"></ion-icon>
+        <p>Estás al día.<br>No hay alertas en este momento.</p>
+      </div>
+    }
+
+  </div>
+  <div class="safe-bottom"></div>
+</ion-content>

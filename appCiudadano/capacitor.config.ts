@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'appCiudadano',
+  appId: 'com.bma.ciudadano',
+  appName: 'BMA Ciudadano',
   webDir: 'www'
 };
 

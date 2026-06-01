@@ -1,0 +1,113 @@
+<ion-content [fullscreen]="true">
+
+  <!-- MAPA BASE -->
+  <div id="map-citizen" class="full-map"></div>
+
+  <!-- OVERLAY DE CARGA INICIAL -->
+  @if (cargando()) {
+    <div class="map-overlay fade-in">
+      <div class="loader-box">
+        <div class="spinner"></div>
+        <span>Cargando mapa...</span>
+      </div>
+    </div>
+  }
+
+  <!-- ZONA SUPERIOR FLOTANTE -->
+  <div class="top-floating-zone fade-in-down">
+    
+    <!-- BUSCADOR -->
+    <div class="search-box">
+      <input type="text" placeholder="Buscar ruta, sector..." class="search-input">
+      <div class="profile-btn">
+        <ion-icon name="search-outline"></ion-icon>
+      </div>
+    </div>
+
+    <!-- CHIPS DE FILTRO -->
+    <div class="filter-chips">
+      <button class="chip" [class.active]="filtroActivo() === 'todas'" (click)="setFiltro('todas')">
+        Todas
+      </button>
+      <button class="chip" [class.active]="filtroActivo() === 'camiones'" (click)="setFiltro('camiones')">
+        <span class="dot green"></span> Camiones
+      </button>
+      <button class="chip" [class.active]="filtroActivo() === 'alertas'" (click)="setFiltro('alertas')">
+        <span class="dot amber"></span> Alertas
+      </button>
+    </div>
+
+  </div>
+
+  <!-- CONTROLES LATERALES (DERECHA) -->
+  <div class="side-controls fade-in">
+    <!-- Notificaciones -->
+    <button class="fab-btn bell-btn" (click)="abrirNotificaciones()">
+      <ion-icon name="notifications"></ion-icon>
+      <span class="badge">2</span>
+    </button>
+    <!-- Ubicación GPS -->
+    <button class="fab-btn" (click)="recuperarUbicacion()">
+      <ion-icon name="navigate"></ion-icon>
+    </button>
+  </div>
+
+  <!-- BOTÓN FLOTANTE MINIMALISTA (CUANDO EL PANEL ESTÁ CERRADO) -->
+  @if (!panelAbierto()) {
+    <div class="minimal-pill-container fade-in-up">
+      <button class="minimal-pill" (click)="togglePanel()">
+        <ion-icon name="map-outline"></ion-icon>
+        <span>{{ camionesActivos().length > 0 ? (camionesActivos().length + ' camión(es) cerca') : 'Rutas en tu zona' }}</span>
+        <ion-icon name="chevron-up-outline" class="pill-arrow"></ion-icon>
+      </button>
+    </div>
+  }
+
+  <!-- BOTTOM SHEET (PANEL INFERIOR) -->
+  <div class="bottom-sheet" [class.collapsed]="!panelAbierto()">
+    
+    <div class="sheet-handle-zone" (click)="togglePanel()">
+      <div class="sheet-handle"></div>
+    </div>
+
+    <div class="sheet-content">
+      <div class="sheet-header">
+        <h2>Rutas en tu zona</h2>
+        <ion-icon name="chevron-down-outline" *ngIf="panelAbierto()" (click)="togglePanel()" class="close-icon"></ion-icon>
+      </div>
+
+      <!-- LISTA DE CAMIONES -->
+      @if (camionesActivos().length > 0) {
+        <div class="trucks-list">
+          @for (camion of camionesActivos(); track camion.recorridoId) {
+            <div class="truck-card" (click)="irACamion(camion)">
+              <div class="truck-icon-wrap" [class]="camion.estado">
+                <ion-icon name="trash"></ion-icon>
+              </div>
+              <div class="truck-info">
+                <h3>{{ camion.nombre }}</h3>
+                <p>
+                  <span class="dot" [class]="camion.estado"></span> 
+                  {{ getEstadoLabel(camion.estado) }}
+                </p>
+              </div>
+              <ion-icon name="chevron-forward-outline" class="arrow"></ion-icon>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-sheet">
+          <ion-icon name="map-outline"></ion-icon>
+          <p>No hay camiones cerca</p>
+        </div>
+      }
+
+      <!-- ACCIÓN SECUNDARIA -->
+      <button class="sheet-action-btn" (click)="verTodasLasRutas()">
+        Ver todas las rutas
+      </button>
+    </div>
+
+  </div>
+
+</ion-content>

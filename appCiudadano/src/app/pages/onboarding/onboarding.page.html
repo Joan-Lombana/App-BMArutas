@@ -1,0 +1,52 @@
+<ion-content [scrollY]="false" class="onboarding-content">
+
+  <div class="onboarding-header">
+    <div class="brand-mini">
+      <span class="brand-text">BMArutas</span>
+    </div>
+  </div>
+
+  <swiper-container pagination="true" class="my-swiper" [paginationClickable]="true">
+    
+    <!-- Slide 1 -->
+    <swiper-slide>
+      <div class="slide-content">
+        <div class="illustration-placeholder">
+          <ion-icon name="location-outline"></ion-icon>
+        </div>
+        <h2 class="slide-title">&iexcl;Bienvenido a BMArutas!</h2>
+        <p class="slide-desc">Consulta las rutas y horarios de recolecci&oacute;n en tu sector f&aacute;cilmente.</p>
+      </div>
+    </swiper-slide>
+
+    <!-- Slide 2 -->
+    <swiper-slide>
+      <div class="slide-content">
+        <div class="illustration-placeholder">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <h2 class="slide-title">Consulta de Horarios</h2>
+        <p class="slide-desc">Revisa qu&eacute; d&iacute;as y a qu&eacute; horas pasar&aacute; el cami&oacute;n cerca de tu residencia.</p>
+      </div>
+    </swiper-slide>
+
+    <!-- Slide 3 -->
+    <swiper-slide>
+      <div class="slide-content">
+        <div class="illustration-placeholder">
+          <ion-icon name="navigate-outline"></ion-icon>
+        </div>
+        <h2 class="slide-title">Rastreo en Vivo</h2>
+        <p class="slide-desc">Abre el mapa para ver la ubicaci&oacute;n en tiempo real de los veh&iacute;culos en tu zona.</p>
+      </div>
+    </swiper-slide>
+
+  </swiper-container>
+
+  <div class="action-footer">
+    <ion-button expand="block" class="main-btn" (click)="comenzar()">
+      Ir al Mapa
+    </ion-button>
+  </div>
+
+</ion-content>

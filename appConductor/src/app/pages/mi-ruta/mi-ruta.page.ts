@@ -91,8 +91,8 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   /** Filtros GPS: trazo continuo al caminar, sin racimos por jitter */
   private readonly GPS_MIN_METROS = 5;
   private readonly GPS_MAX_ACCURACY_M = 30;
-  private readonly GPS_MIN_INTERVALO_MS = 3000;
-  private readonly GPS_MAX_VELOCIDAD_MS = 15; // descarta solo saltos imposibles
+
+  
 
 
   // Estado de la cámara
@@ -149,17 +149,32 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
 
       setTimeout(() => {
-        this.cargandoRuta = false;
-        this.initMap();
-        this.setupGeolocation();
-        this.panelAbierto.set(true);
-      }, remaining);
-    }, () => {
-      this.cargandoRuta = false;
-      this.panelAbierto.set(true);
+    this.cargandoRuta = false;
+
+    if (!this.map) {
       this.initMap();
+    }
+
+    if (!this.watchId) {
       this.setupGeolocation();
-    });
+    }
+
+    this.panelAbierto.set(true);
+  }, remaining);
+
+  }, () => {
+    this.cargandoRuta = false;
+
+    if (!this.map) {
+      this.initMap();
+    }
+
+    if (!this.watchId) {
+      this.setupGeolocation();
+    }
+
+    this.panelAbierto.set(true);
+  });
   }
 
   private cargarRecorridoAsignado(onSuccess?: () => void, onError?: () => void) {
@@ -333,74 +348,87 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
    * Descarta lecturas con mala precisión, micro-movimientos o saltos imposibles (GPS jitter).
    */
   private debeAceptarLecturaGps(
-    lat: number,
-    lng: number,
-    accuracy: number | null | undefined,
-    ts: number,
-  ): boolean {
-    if (accuracy != null && accuracy > this.GPS_MAX_ACCURACY_M) {
-      return false;
-    }
+  lat: number,
+  lng: number,
+  accuracy: number | null | undefined,
+  ts: number,
+): boolean {
 
-    const ref = this.ultimaPosicionEnviada ?? this.ultimaPosicionActualizada;
-    if (!ref) {
-      return true;
-    }
+  if (accuracy != null && accuracy > this.GPS_MAX_ACCURACY_M) {
+    return false;
+  }
 
-    const dist = this.distanciaMetros(lat, lng, ref.lat, ref.lng);
-    if (dist < this.GPS_MIN_METROS) {
-      return false;
-    }
+  const ref = this.ultimaPosicionEnviada;
 
-    const refTs = this.ultimaPosicionEnviada?.ts ?? 0;
-    if (refTs > 0) {
-      const dtSec = (ts - refTs) / 1000;
-      if (dtSec > 0 && dtSec < 120 && dist / dtSec > this.GPS_MAX_VELOCIDAD_MS) {
-        return false;
-      }
-    }
-
+  if (!ref) {
     return true;
   }
 
+  const dist = this.distanciaMetros(
+    lat,
+    lng,
+    ref.lat,
+    ref.lng
+  );
+
+  return dist >= this.GPS_MIN_METROS;
+}
+
   private procesarLecturaGps(
-    lat: number,
-    lng: number,
-    accuracy: number | null | undefined,
-    ts: number,
-    enviarAlServidor: boolean,
-  ) {
-    if (!this.debeAceptarLecturaGps(lat, lng, accuracy, ts)) {
-      return;
-    }
-
-    this.ultimaPosicionActualizada = { lat, lng };
-    this.posicionActual = { lat, lng };
-    this.actualizarMarcadorConductor(lat, lng);
-
-    if (!enviarAlServidor || !this.recorridoActivo || !this.recorridoIdActual) {
-      return;
-    }
-
-    if (this.map) {
-      this.map.setView([lat, lng], undefined, { animate: true });
-    }
-
-    const ahora = Date.now();
-    if (ahora - this.ultimoEnvioPosicion < this.GPS_MIN_INTERVALO_MS) {
-      return;
-    }
-
-    this.ultimoEnvioPosicion = ahora;
-    this.ultimaPosicionEnviada = { lat, lng, ts };
-
-    this.rutaService.enviarPosicion(this.recorridoIdActual, lat, lng).subscribe({
-      next: () => { this.posicionesenviadas++; },
-      error: (err) => console.error('⚠️ Error enviando posición', err),
-    });
+  lat: number,
+  lng: number,
+  accuracy: number | null | undefined,
+  ts: number,
+  enviarAlServidor: boolean,
+) {
+  if (!this.debeAceptarLecturaGps(lat, lng, accuracy, ts)) {
+    return;
   }
 
-  // Lógica de geolocalización y seguimiento GPS
+  this.ultimaPosicionActualizada = { lat, lng };
+  this.posicionActual = { lat, lng };
+  this.actualizarMarcadorConductor(lat, lng);
+
+  if (!enviarAlServidor || !this.recorridoActivo || !this.recorridoIdActual) {
+    return;
+  }
+
+  let debeEnviar = false;
+
+  if (!this.ultimaPosicionEnviada) {
+    debeEnviar = true;
+  } else {
+    const distancia = this.distanciaMetros(
+      lat,
+      lng,
+      this.ultimaPosicionEnviada.lat,
+      this.ultimaPosicionEnviada.lng
+    );
+
+    debeEnviar = distancia >= this.GPS_MIN_METROS;
+  }
+
+  if (!debeEnviar) {
+    return;
+  }
+
+  this.ultimaPosicionEnviada = { lat, lng, ts };
+
+  this.rutaService.enviarPosicion(
+    this.recorridoIdActual,
+    lat,
+    lng
+  ).subscribe({
+    next: () => {
+      this.posicionesenviadas++;
+    },
+    error: (err) => {
+      console.error('⚠️ Error enviando posición', err);
+    }
+  });
+}
+
+
   async setupGeolocation() {
     try {
       // 1. Verificar si ya tenemos permisos antes de pedir
@@ -482,7 +510,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       this.usarPosicionFallback();
     }
   }
-
   actualizarMarcadorConductor(lat: number, lng: number) {
     if (!this.map) return;
 

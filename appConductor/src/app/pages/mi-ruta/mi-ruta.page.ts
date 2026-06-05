@@ -374,6 +374,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   return dist >= this.GPS_MIN_METROS;
 }
 
+  
   private procesarLecturaGps(
   lat: number,
   lng: number,
@@ -399,21 +400,32 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     debeEnviar = true;
   } else {
     const distancia = this.distanciaMetros(
-      lat,
-      lng,
+      lat, lng,
       this.ultimaPosicionEnviada.lat,
       this.ultimaPosicionEnviada.lng
     );
-
     debeEnviar = distancia >= this.GPS_MIN_METROS;
   }
 
-  if (!debeEnviar) {
-    return;
-  }
+  if (!debeEnviar) return;
 
+  // ✅ Marcar ANTES de enviar para no duplicar, pero guardar ref por si falla
+  const posicionAnterior = this.ultimaPosicionEnviada;
   this.ultimaPosicionEnviada = { lat, lng, ts };
 
+  // ✅ Emitir por WebSocket inmediatamente (tiempo real sin esperar HTTP)
+  if (this.recorridoIdActual) {
+    this.ws.emitirPosicion({
+      id: crypto.randomUUID(),
+      recorridoId: this.recorridoIdActual,
+      latitud: lat,
+      longitud: lng,
+      timestamp: ts,
+      velocidad: 0,
+    });
+  }
+
+  // ✅ Enviar por HTTP también (persistencia en BD)
   this.rutaService.enviarPosicion(
     this.recorridoIdActual,
     lat,
@@ -424,6 +436,11 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     },
     error: (err) => {
       console.error('⚠️ Error enviando posición', err);
+      // ❌ Si falla el HTTP, revertir para que la próxima lectura lo reintente
+      // Solo revertir si no hubo otra posición más nueva entre tanto
+      if (this.ultimaPosicionEnviada?.ts === ts) {
+        this.ultimaPosicionEnviada = posicionAnterior;
+      }
     }
   });
 }
@@ -630,21 +647,36 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
   /** Envía posición al servidor respetando los mismos filtros GPS (salvo inicio de recorrido). */
   private emitirPosicionActual(lat: number, lng: number, forzar = false) {
-    if (!this.recorridoIdActual) return;
+  if (!this.recorridoIdActual) return;
 
-    const ts = Date.now();
-    if (!forzar && !this.debeAceptarLecturaGps(lat, lng, null, ts)) {
-      return;
-    }
-
-    this.ultimoEnvioPosicion = ts;
-    this.ultimaPosicionEnviada = { lat, lng, ts };
-
-    this.rutaService.enviarPosicion(this.recorridoIdActual, lat, lng).subscribe({
-      next: () => { this.posicionesenviadas++; },
-      error: (err) => console.error('⚠️ Error enviando posición', err),
-    });
+  const ts = Date.now();
+  if (!forzar && !this.debeAceptarLecturaGps(lat, lng, null, ts)) {
+    return;
   }
+
+  const posicionAnterior = this.ultimaPosicionEnviada;
+  this.ultimaPosicionEnviada = { lat, lng, ts };
+
+  // ✅ WebSocket también aquí
+  this.ws.emitirPosicion({
+    id: crypto.randomUUID(),
+    recorridoId: this.recorridoIdActual,
+    latitud: lat,
+    longitud: lng,
+    timestamp: ts,
+    velocidad: 0,
+  });
+
+  this.rutaService.enviarPosicion(this.recorridoIdActual, lat, lng).subscribe({
+    next: () => { this.posicionesenviadas++; },
+    error: (err) => {
+      console.error('⚠️ Error enviando posición', err);
+      if (this.ultimaPosicionEnviada?.ts === ts) {
+        this.ultimaPosicionEnviada = posicionAnterior;
+      }
+    },
+  });
+}
 
   async toggleRecorrido() {
     this.recorridoActivo = !this.recorridoActivo;

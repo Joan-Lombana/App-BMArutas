@@ -131,7 +131,14 @@ export class MapaService {
     this.rutaSeleccionada.set(null);
   }
 
-  crearMarcadorFoto(lat: number, lon: number, posicionId: string, timestamp: number, apiUrl: string): L.Marker {
+  crearMarcadorFoto(
+    lat: number,
+    lon: number,
+    posicionId: string,
+    timestamp: number,
+    apiUrl: string,
+    imagenUrl?: string
+  ): L.Marker {
     const fecha = new Date(timestamp);
     const dateStr = fecha.toLocaleString('es-ES', { 
       day: 'numeric', month: 'numeric', year: 'numeric', 
@@ -180,10 +187,11 @@ export class MapaService {
     });
 
     const marker = L.marker([lat, lon], { icon: cameraIcon });
+    const srcImagen = this.normalizarUrlImagen(posicionId, apiUrl, imagenUrl);
     
     const popupContent = `
       <div style="position: relative; width: 200px; height: 260px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 8px 16px rgba(0,0,0,0.4);">
-        <img src="${apiUrl}/operativo/posiciones/${posicionId}/imagen" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.src='assets/no-image.png'" />
+        <img src="${srcImagen}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.src=&quot;data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' width='200' height='260' viewBox='0 0 200 260'&gt;&lt;rect width='200' height='260' fill='%231f2937'/&gt;&lt;circle cx='100' cy='110' r='32' fill='%23374151'/&gt;&lt;path d='M100 98v24M88 110h24' stroke='%239ca3af' stroke-width='3' stroke-linecap='round'/&gt;&lt;text x='100' y='170' fill='%239ca3af' font-family='sans-serif' font-size='13' font-weight='bold' text-anchor='middle'&gt;Imagen no&lt;/text&gt;&lt;text x='100' y='190' fill='%239ca3af' font-family='sans-serif' font-size='13' font-weight='bold' text-anchor='middle'&gt;disponible&lt;/text&gt;&lt;/svg&gt;&quot;" />
         <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 12px 12px; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%); color: white; font-family: sans-serif; font-size: 11px; font-weight: 500; text-align: center; pointer-events: none;">
           Recolección en vivo<br>${dateStr}
         </div>
@@ -197,6 +205,17 @@ export class MapaService {
     });
 
     return marker;
+  }
+
+  private normalizarUrlImagen(posicionId: string, apiUrl: string, imagenUrl?: string): string {
+    const fallback = `${apiUrl}/operativo/recorridos/posiciones/${posicionId}/imagen`;
+    if (!imagenUrl) return fallback;
+    if (/^https?:\/\//i.test(imagenUrl) || imagenUrl.startsWith('data:image/')) return imagenUrl;
+
+    const apiOrigin = apiUrl.replace(/\/api\/?$/, '');
+    if (imagenUrl.startsWith('/api/')) return `${apiOrigin}${imagenUrl}`;
+    if (imagenUrl.startsWith('/')) return `${apiUrl}${imagenUrl}`;
+    return `${apiUrl}/${imagenUrl}`;
   }
 
   private parseShape(shape: RutaSeleccionada['shape']) {

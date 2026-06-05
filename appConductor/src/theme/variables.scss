@@ -1,37 +1,26 @@
 // =========================================
-// TIPOGRAFIA GLOBAL — Open Sauce One
+// TIPOGRAFIA GLOBAL - Open Sauce One
 // =========================================
 
-/* MODO LUZ (Mejor contraste) */
 :root {
   --ion-font-family: 'Open Sauce One', sans-serif;
-  
-  --bg-main: #F4F5F8;
-  --bg-card: #FFFFFF;
-  --primary: #2F80ED; /* Azul más oscuro para mejor contraste sobre blanco */
-  --text-main: #1F2937; /* Gris muy oscuro, casi negro */
-  --text-sec: #4B5563; /* Gris medio para textos secundarios */
-  --border-color: rgba(0, 0, 0, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.85);
+
+  --bg-main: #161B22;
+  --bg-card: #21262d;
+  --primary: #96B4EA;
+  --text-main: #F2F2F2;
+  --text-sec: #9eaab5;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --glass-bg: rgba(22, 27, 34, 0.82);
 
   --ion-background-color: var(--bg-main);
   --ion-text-color: var(--text-main);
-}
-
-/* MODO OSCURO (Adaptación) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-main: #161B22;
-    --bg-card: #21262d;
-    --primary: #96B4EA;
-    --text-main: #F2F2F2;
-    --text-sec: #9eaab5;
-    --border-color: rgba(255, 255, 255, 0.05);
-    --glass-bg: rgba(22, 27, 34, 0.55);
-    
-    --ion-background-color: var(--bg-main);
-    --ion-text-color: var(--text-main);
-  }
+  --ion-color-primary: var(--primary);
+  --ion-color-primary-contrast: var(--bg-main);
+  --ion-item-background: var(--bg-card);
+  --ion-toolbar-background: var(--bg-main);
+  --ion-card-background: var(--bg-card);
+  color-scheme: dark;
 }
 
 body,

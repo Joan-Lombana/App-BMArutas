@@ -74,6 +74,16 @@ export class RutaService {
     return coordinates.map(([lng, lat]) => [lat, lng]);
   }
 
+  private recorridoIdSeleccionado: string | null = null;
+
+  setRecorridoSeleccionado(id: string | null) {
+    this.recorridoIdSeleccionado = id;
+  }
+
+  getRecorridoSeleccionado(): string | null {
+    return this.recorridoIdSeleccionado;
+  }
+
   /**
    * Obtiene el recorrido ASIGNADO al conductor autenticado.
    * Filtra por conductor_id del usuario en sesión.
@@ -91,6 +101,14 @@ export class RutaService {
         }),
         map((recorridos: any[]) => {
           if (!recorridos || recorridos.length === 0) return null;
+          
+          // Si el usuario seleccionó uno específico, lo priorizamos
+          const seleccionadoId = this.getRecorridoSeleccionado();
+          if (seleccionadoId) {
+            const match = recorridos.find(r => r.id === seleccionadoId);
+            if (match) return match;
+          }
+
           const miRecorrido = recorridos.find(
             r => r.conductor_id === conductorId &&
             (r.estado === 'Activa' || r.estado === 'Programada' || r.estado === 'Pausado')

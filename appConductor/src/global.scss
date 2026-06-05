@@ -32,9 +32,8 @@
  * https://ionicframework.com/docs/theming/dark-mode
  */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+@import "@ionic/angular/css/palettes/dark.always.css";
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
 
 /* Open Sauce One — tipografia de cuerpo */
 @font-face {
@@ -91,7 +90,7 @@ ion-tab-bar.floating-pill-tabs {
   height: 62px;
   border-radius: 32px;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
   padding: 0 8px;
 }
 

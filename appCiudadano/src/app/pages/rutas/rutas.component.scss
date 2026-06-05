@@ -69,6 +69,11 @@
     border-color: var(--primary);
   }
 
+  &.scheduled.active {
+    background: #f59e0b;
+    border-color: #f59e0b;
+  }
+
   .count {
     background: rgba(255,255,255,0.25);
     border-radius: 10px;
@@ -107,6 +112,7 @@
   transition: transform 0.15s;
   &:active { transform: scale(0.985); }
   &.inactiva { opacity: 0.72; }
+  &.programada { opacity: 0.9; }
 }
 
 .ruta-num {
@@ -123,6 +129,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   &.inactiva { background: var(--border-color); color: var(--text-sec); }
+  &.programada { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
 }
 
 .ruta-body { flex: 1; min-width: 0; }
@@ -151,6 +158,8 @@
   white-space: nowrap;
   flex-shrink: 0;
   &.activa { background: rgba(150, 180, 234, 0.12); color: var(--primary); }
+  &.pausada { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+  &.programada { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
   &.inactiva { background: var(--border-color); color: var(--text-sec); }
 }
 

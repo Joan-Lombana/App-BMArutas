@@ -39,18 +39,26 @@
         </div>
       }
 
-      <!-- MAIN ROUTE CARD (BMAR-189, BMAR-190) -->
-      @if (!cargandoRuta && rutaAsignada) {
-        <div class="route-card-stitch fade-in-up" style="animation-delay: 0.1s">
-          <div class="status-pill status-wait">{{ rutaAsignada.estado }}</div>
-          <h2 class="route-title">{{ rutaAsignada.nombre_ruta }}</h2>
+      <!-- PARTE 1: RUTA PRINCIPAL (FIJA) - OPCIÓN 3 -->
+      @if (!cargandoRuta && rutaPrincipal) {
+        <h3 style="color: var(--text-sec); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;">Ruta del Día</h3>
+        
+        <div class="route-card-principal fade-in-up" style="position: relative; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border-width: 2px; border-style: solid; border-color: var(--primary); padding: 20px; background: var(--bg-card); border-radius: 24px; box-sizing: border-box; margin-bottom: 32px;">
+          
+          <!-- Badge de estado -->
+          <div style="position: absolute; top: 20px; right: 20px; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--primary);">SELECCIONADA</span>
+            <ion-icon name="checkmark-circle" style="font-size: 20px;"></ion-icon>
+          </div>
+          
+          <h2 class="route-title" style="margin-top: 0; margin-bottom: 12px; font-size: 24px; font-weight: 700; color: var(--text-main);">{{ rutaPrincipal.ruta.nombre_ruta }}</h2>
           
           <!-- Vehículo y Salida -->
           <div class="meta-rows" style="margin-bottom: 20px;">
             <div class="truck-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--text-main); font-weight: 500;">
               <ion-icon name="car-sport-outline" style="color: var(--primary); font-size: 20px;"></ion-icon>
-              @if (recorridoAsignado?.vehiculo?.placa) {
-                <span>Vehículo: <strong style="color: var(--primary);">{{ recorridoAsignado.vehiculo.placa }}</strong></span>
+              @if (rutaPrincipal.recorrido?.vehiculo?.placa) {
+                <span>Vehículo: <strong style="color: var(--primary);">{{ rutaPrincipal.recorrido.vehiculo.placa }}</strong></span>
               } @else {
                 <span style="color: var(--text-sec);">Vehículo: <small>Pendiente de placa</small></span>
               }
@@ -58,23 +66,50 @@
 
             <div class="time-row" style="display: flex; align-items: center; gap: 8px; color: var(--text-sec); font-size: 13px;">
               <ion-icon name="calendar-outline" style="font-size: 18px; color: var(--primary);"></ion-icon>
-              @if (recorridoAsignado?.fecha_programada) {
-                <span>Salida: <strong>{{ recorridoAsignado.fecha_programada | date:'dd/MM/yyyy HH:mm' }}</strong></span>
+              @if (rutaPrincipal.recorrido?.fecha_programada) {
+                <span>Salida: <strong>{{ rutaPrincipal.recorrido.fecha_programada | date:'dd/MM/yyyy HH:mm' }}</strong></span>
               } @else {
                 <span>Día y Hora de Salida: <small>No definida</small></span>
               }
             </div>
           </div>
 
-          <ion-button expand="block" class="stitch-play-btn" routerLink="/tabs/manifest">
+          <ion-button expand="block" class="stitch-play-btn" routerLink="/tabs/manifest" style="--border-radius: 16px; margin: 0; height: 48px;">
             <ion-icon name="play-sharp" slot="start"></ion-icon>
             INICIAR RECORRIDO
           </ion-button>
         </div>
       }
 
+      <!-- PARTE 2: RUTAS SECUNDARIAS (CARRUSEL COMPACTO) -->
+      @if (!cargandoRuta && rutasSecundarias.length > 0) {
+        <h3 style="color: var(--text-sec); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;">Otras Rutas del Día</h3>
+        
+        <div class="routes-carousel-secondary" style="margin-bottom: 24px; display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;">
+          @for (item of rutasSecundarias; track item.recorrido.id) {
+            <div class="route-card-mini fade-in-up" 
+                 (click)="seleccionarRutaSecundaria(item)"
+                 style="position: relative; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border-width: 1.5px; border-style: solid; border-color: var(--border-color); padding: 16px; background: var(--bg-card); border-radius: 16px; min-width: 140px; max-width: 140px; flex-shrink: 0; box-sizing: border-box; text-align: center;">
+              
+              <!-- Estado badge pequeño -->
+              <div class="status-pill status-wait" style="position: absolute; top: 8px; right: 8px; margin: 0; font-size: 9px; padding: 4px 8px;">{{ item.recorrido.estado }}</div>
+              
+              <h3 style="margin: 12px 0 8px 0; font-size: 14px; font-weight: 700; color: var(--text-main);">{{ item.ruta.nombre_ruta }}</h3>
+              
+              <div style="font-size: 12px; color: var(--text-sec); margin-bottom: 8px;">
+                @if (item.recorrido?.vehiculo?.placa) {
+                  <div style="margin-bottom: 4px;">{{ item.recorrido.vehiculo.placa }}</div>
+                }
+              </div>
+              
+              <div style="font-size: 11px; color: var(--primary); font-weight: 600;">TAP PARA SELECCIONAR</div>
+            </div>
+          }
+        </div>
+      }
+
       <!-- BMAR-191: MENSAJE SIN RUTA ASIGNADA -->
-      @if (!cargandoRuta && !rutaAsignada) {
+      @if (!cargandoRuta && recorridosAsignados.length === 0) {
         <div class="no-route-card fade-in-up" style="animation-delay: 0.1s; background: var(--bg-card); border-radius: 24px; padding: 40px 24px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px;">
           <div style="width: 64px; height: 64px; background: rgba(150, 180, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
             <ion-icon name="map-outline" style="font-size: 32px; color: var(--primary);"></ion-icon>

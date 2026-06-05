@@ -116,3 +116,14 @@ ion-tab-bar.floating-pill-tabs ion-tab-button ion-label {
   display: none;
 }
 
+/* Ajustes globales de consistencia de color y safe area */
+ion-content {
+  --background: var(--bg-main) !important;
+}
+
+ion-header {
+  background: var(--bg-main) !important;
+  padding-top: env(safe-area-inset-top) !important;
+}
+
+

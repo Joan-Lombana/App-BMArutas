@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'appConductor',
+  appId: 'com.bma.conductor',
+  appName: 'BMA Conductor',
   webDir: 'www',
   server: {
     cleartext: true

@@ -3,7 +3,7 @@
 }
 
 .wrapper {
-  padding: env(safe-area-inset-top, 20px) 20px 120px;
+  padding: env(safe-area-inset-top, 20px) 0 120px;
   display: flex;
   flex-direction: column;
 }
@@ -14,6 +14,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
+  padding: 0 20px;
 
   .brand-info {
     display: flex;
@@ -70,6 +71,7 @@
 // --- TÍTULO ---
 .title-section {
   margin-bottom: 24px;
+  padding: 0 20px;
 
   h1 {
     margin: 0 0 4px 0;
@@ -138,32 +140,82 @@
 }
 
 // --- LISTA DE RUTAS ---
+.section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.section-label {
+  min-width: 0;
+  color: var(--text-sec);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.route-count {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--border-color);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .rutas-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 16px;
-  margin-bottom: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 20px 22px;
+  margin: 0 0 20px;
+  scroll-padding: 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  scrollbar-width: none;
 }
 
 .ruta-card {
+  flex: 0 0 min(82vw, 340px);
+  min-height: 194px;
   background: var(--bg-card);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 20px;
   border: 1px solid var(--border-color);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  scroll-snap-align: start;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.14);
+  transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
 
   &:active { transform: scale(0.98); }
 
   // Variante ACTIVA — borde cyan sutil
   &--activa {
-    border-color: rgba(150, 180, 234, 0.4);
-    background: linear-gradient(135deg, var(--bg-card) 60%, rgba(150, 180, 234, 0.08));
+    border-color: rgba(150, 180, 234, 0.55);
+    background:
+      radial-gradient(circle at top right, rgba(150, 180, 234, 0.18), transparent 42%),
+      var(--bg-card);
+    box-shadow: 0 18px 34px rgba(150, 180, 234, 0.12);
   }
 
   // Variante ASIGNADA — borde blanco muy sutil
   &--asignada {
     border-color: var(--border-color);
+  }
+
+  &--finalizada {
+    opacity: 0.82;
   }
 }
 
@@ -171,6 +223,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
   margin-bottom: 4px;
 
   .card-codigo-group {
@@ -184,11 +237,13 @@
     font-weight: 800;
     color: var(--primary);
     letter-spacing: -0.5px;
+    overflow-wrap: anywhere;
   }
 }
 
 // BADGES DE ESTADO
 .estado-badge {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -228,20 +283,28 @@
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.2;
+  min-height: 44px;
+  overflow-wrap: anywhere;
 }
 
 .card-bottom-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 
   .horario {
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 6px;
     color: var(--text-sec);
     font-size: 14px;
     font-weight: 500;
+
+    span {
+      overflow-wrap: anywhere;
+    }
 
     ion-icon { color: var(--text-sec); font-size: 16px; }
   }
@@ -257,6 +320,7 @@
     letter-spacing: 0.5px;
     cursor: pointer;
     transition: opacity 0.2s;
+    flex: 0 0 auto;
 
     &:active { opacity: 0.85; }
   }
@@ -278,6 +342,7 @@
   border-radius: 20px;
   padding: 20px;
   border: 1px solid var(--border-color);
+  margin: 0 20px;
 
   .jornada-header {
     display: flex;
@@ -323,6 +388,12 @@
         &.highlight { color: var(--primary); }
       }
     }
+  }
+}
+
+@media (min-width: 520px) {
+  .ruta-card {
+    flex-basis: 360px;
   }
 }
 

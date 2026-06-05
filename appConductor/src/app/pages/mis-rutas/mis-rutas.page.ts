@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline, mapOutline } from 'ionicons/icons';
+import { timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline, mapOutline, chevronBackOutline } from 'ionicons/icons';
 import { RutaService } from '../../services/ruta.service';
 import { OfflineService } from '../../services/offline.service';
 
@@ -36,10 +36,11 @@ export class MisRutasPage implements OnInit {
   // Nombre del conductor — vendrá del servicio de autenticación
   conductorNombre: string = '';
 
-  // Fecha de hoy formateada
-  fechaHoy: string = '';
+  // ✨ Fecha seleccionada para historial
+  fechaSeleccionada: Date = new Date();
+  fechaFormateada: string = '';
 
-  // Estructura de la ruta a mostrar
+  // Estructura de la ruta a mostrar (solo completadas)
   rutas: any[] = [];
   cargando = true;
   resumenJornada: any = null; // Por ahora sin datos del backend
@@ -47,31 +48,36 @@ export class MisRutasPage implements OnInit {
   public offlineService = inject(OfflineService); // ✅ Accesible desde el HTML
 
   constructor() {
-    addIcons({ timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline, mapOutline });
+    addIcons({ timeOutline, chevronForwardOutline, checkmarkCircle, playCircle, cloudOfflineOutline, notificationsOutline, mapOutline, chevronBackOutline });
   }
 
   ngOnInit() {
-    this.setFechaHoy();
-    this.cargarRutaAsignada();
+    this.actualizarFechaFormateada();
+    this.cargarHistorial();
   }
 
   ionViewWillEnter() {
-    this.cargarRutaAsignada();
+    this.cargarHistorial();
   }
 
-  cargarRutaAsignada() {
+  // ✨ Cargar historial de rutas completadas para una fecha específica
+  cargarHistorial() {
     this.cargando = true;
+    // Por ahora, obteneremos todas las rutas pero filtraremos solo las finalizadas
     this.rutaService.obtenerTodosLosRecorridosAsignados().subscribe({
       next: (resultados) => {
-        this.rutas = resultados.map(({ recorrido, ruta }) => ({
-          codigo: ruta?.nombre_ruta || 'Sin código',
-          zona: 'Buenaventura',
-          horarioInicio: '06:00',
-          horarioFin: '14:00',
-          estado: this.mapearEstado(recorrido?.estado),
-          _ruta: ruta,
-          _recorrido: recorrido
-        }));
+        this.rutas = resultados
+          .filter(({ recorrido }) => recorrido?.estado === 'Finalizado') // ✨ Solo completadas
+          .map(({ recorrido, ruta }) => ({
+            codigo: ruta?.nombre_ruta || 'Sin código',
+            zona: 'Buenaventura',
+            horarioInicio: '06:00',
+            horarioFin: '14:00',
+            estado: this.mapearEstado(recorrido?.estado),
+            fechaCompletada: recorrido?.fecha_finalizacion || new Date(),
+            _ruta: ruta,
+            _recorrido: recorrido
+          }));
         this.cargando = false;
       },
       error: () => {
@@ -81,6 +87,38 @@ export class MisRutasPage implements OnInit {
     });
   }
 
+  // ✨ Cambiar fecha anterior
+  irFechaAnterior() {
+    this.fechaSeleccionada.setDate(this.fechaSeleccionada.getDate() - 1);
+    this.actualizarFechaFormateada();
+    this.cargarHistorial();
+  }
+
+  // ✨ Cambiar fecha siguiente
+  irFechaSiguiente() {
+    const hoy = new Date();
+    const mañana = new Date(hoy);
+    mañana.setDate(mañana.getDate() + 1);
+    
+    // No permitir ir más allá de hoy
+    if (this.fechaSeleccionada.toDateString() !== hoy.toDateString()) {
+      this.fechaSeleccionada.setDate(this.fechaSeleccionada.getDate() + 1);
+      this.actualizarFechaFormateada();
+      this.cargarHistorial();
+    }
+  }
+
+  // ✨ Actualizar la fecha formateada para mostrar
+  actualizarFechaFormateada() {
+    const opciones: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    };
+    this.fechaFormateada = this.fechaSeleccionada.toLocaleDateString('es-CO', opciones);
+  }
+
   mapearEstado(estadoBackend: string): string {
     switch (estadoBackend) {
       case 'Activa': return 'activa';
@@ -88,16 +126,6 @@ export class MisRutasPage implements OnInit {
       case 'Finalizado': return 'finalizada';
       default: return 'asignada';
     }
-  }
-
-  setFechaHoy() {
-    const ahora = new Date();
-    const opciones: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long'
-    };
-    this.fechaHoy = ahora.toLocaleDateString('es-CO', opciones);
   }
 
   // Estado del badge de una ruta

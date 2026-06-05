@@ -9,6 +9,13 @@ export interface PosicionReal {
   timestamp: number;
 }
 
+export interface EstadoRecorridoReal {
+  recorridoId: string;
+  estado: string;
+  rutaId?: string;
+  ruta_id?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -45,12 +52,30 @@ export class SocketService {
   }
 
   // Escuchar cuando un recorrido cambia de estado (Iniciado/Finalizado)
-  onEstadoRecorrido(callback: (data: any) => void) {
+  onEstadoRecorrido(callback: (data: EstadoRecorridoReal) => void) {
+    this.socket.on('recorrido.estado', callback);
     this.socket.on('estadoRecorridoCambiado', callback);
   }
 
-  offEstadoRecorrido(callback: (data: any) => void) {
+  offEstadoRecorrido(callback: (data: EstadoRecorridoReal) => void) {
+    this.socket.off('recorrido.estado', callback);
     this.socket.off('estadoRecorridoCambiado', callback);
+  }
+
+  onRecorridoAsignado(callback: (data: any) => void) {
+    this.socket.on('recorrido.asignado', callback);
+  }
+
+  offRecorridoAsignado(callback: (data: any) => void) {
+    this.socket.off('recorrido.asignado', callback);
+  }
+
+  onRecorridoEliminado(callback: (data: any) => void) {
+    this.socket.on('recorrido.eliminado', callback);
+  }
+
+  offRecorridoEliminado(callback: (data: any) => void) {
+    this.socket.off('recorrido.eliminado', callback);
   }
 
   // Escuchar nuevas incidencias

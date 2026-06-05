@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">Rutas</h1>
-        <p class="page-subtitle">{{ rutas().length }} rutas en la ciudad</p>
+        <p class="page-subtitle">{{ rutas().length }} rutas activas o programadas</p>
       </div>
     </div>
   </ion-toolbar>
@@ -20,7 +20,6 @@
 <ion-content [fullscreen]="true">
   <div class="content-pad">
 
-    <!-- FILTROS -->
     <div class="filter-row">
       <button class="filter-chip" [class.active]="filtro() === 'todas'" (click)="setFiltro('todas')">
         Todas
@@ -28,12 +27,11 @@
       <button class="filter-chip green" [class.active]="filtro() === 'activas'" (click)="setFiltro('activas')">
         Activas <span class="count">{{ totalActivas }}</span>
       </button>
-      <button class="filter-chip" [class.active]="filtro() === 'inactivas'" (click)="setFiltro('inactivas')">
-        Inactivas <span class="count">{{ totalInactivas }}</span>
+      <button class="filter-chip scheduled" [class.active]="filtro() === 'programadas'" (click)="setFiltro('programadas')">
+        Programadas <span class="count">{{ totalProgramadas }}</span>
       </button>
     </div>
 
-    <!-- CARGANDO -->
     @if (cargando()) {
       <div class="loading-state">
         <div class="loading-spinner"></div>
@@ -41,29 +39,31 @@
       </div>
     }
 
-    <!-- ACTIVAS AHORA -->
-    @if (rutasActivas().length > 0 && filtro() !== 'inactivas') {
+    @if (!cargando() && rutasActivas().length > 0 && filtro() !== 'programadas') {
       <div class="section-label">ACTIVAS AHORA</div>
       @for (ruta of rutasActivas(); track ruta.id) {
         <div class="ruta-card activa">
-          <div class="ruta-num" [style.background]="ruta.color || '#96B4EA'">
+          <div class="ruta-num" [style.background]="ruta.color || ruta.color_hex || '#96B4EA'">
             {{ (ruta.id || '').toString().slice(-2) }}
           </div>
           <div class="ruta-body">
             <div class="ruta-top">
               <h3 class="ruta-name">{{ ruta.nombre_ruta || 'Ruta sin nombre' }}</h3>
-              <span class="badge activa">&#9679; Activa</span>
+              <span class="badge" [class.activa]="ruta.activa" [class.pausada]="ruta.pausada">
+                &#9679; {{ getEstadoRuta(ruta) }}
+              </span>
             </div>
             @if (ruta.descripcion) {
               <p class="ruta-desc">{{ ruta.descripcion }}</p>
             }
-            @if (ruta.paradas) {
-              <p class="ruta-meta">
-                <ion-icon name="location-outline"></ion-icon>
-                {{ ruta.paradas }} paradas
-                @if (ruta.frecuencia) { &middot; {{ ruta.frecuencia }} }
-              </p>
-            }
+            <p class="ruta-meta">
+              <ion-icon name="location-outline"></ion-icon>
+              @if (ruta.vehiculo_placa) {
+                Vehiculo {{ ruta.vehiculo_placa }}
+              } @else {
+                Recorrido en curso
+              }
+            </p>
             <button class="btn-mapa" (click)="verEnMapa(ruta)">
               <ion-icon name="map-outline"></ion-icon>
               Ver en mapa
@@ -73,23 +73,29 @@
       }
     }
 
-    <!-- INACTIVAS -->
-    @if (rutasInactivas().length > 0 && filtro() !== 'activas') {
-      <div class="section-label muted">INACTIVAS</div>
-      @for (ruta of rutasInactivas(); track ruta.id) {
-        <div class="ruta-card inactiva">
-          <div class="ruta-num inactiva">
+    @if (!cargando() && rutasProgramadas().length > 0 && filtro() !== 'activas') {
+      <div class="section-label muted">PROGRAMADAS</div>
+      @for (ruta of rutasProgramadas(); track ruta.id) {
+        <div class="ruta-card programada">
+          <div class="ruta-num programada">
             {{ (ruta.id || '').toString().slice(-2) }}
           </div>
           <div class="ruta-body">
             <div class="ruta-top">
               <h3 class="ruta-name">{{ ruta.nombre_ruta || 'Ruta sin nombre' }}</h3>
-              <span class="badge inactiva">Inactiva</span>
+              <span class="badge programada">&#9679; Programada</span>
             </div>
             @if (ruta.descripcion) {
               <p class="ruta-desc">{{ ruta.descripcion }}</p>
             }
-            <p class="ruta-meta muted">Sin camiones asignados</p>
+            <p class="ruta-meta muted">
+              <ion-icon name="calendar-outline"></ion-icon>
+              @if (ruta.fecha_programada) {
+                {{ ruta.fecha_programada | date:'dd/MM/yyyy HH:mm' }}
+              } @else {
+                Pendiente por iniciar
+              }
+            </p>
             <button class="btn-detalle" (click)="verEnMapa(ruta)">
               Detalles
               <ion-icon name="chevron-forward-outline"></ion-icon>
@@ -99,11 +105,10 @@
       }
     }
 
-    <!-- VACIO -->
     @if (!cargando() && rutasFiltradas().length === 0) {
       <div class="empty-state">
         <ion-icon name="search-outline"></ion-icon>
-        <p>No se encontraron rutas</p>
+        <p>No se encontraron rutas activas o programadas</p>
       </div>
     }
 

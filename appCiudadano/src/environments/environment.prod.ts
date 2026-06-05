@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://3.137.66.227:3000/api',
-  socketUrl: 'http://3.137.66.227:3000'
+  apiUrl: 'https://bmarutas.online/api',
+  socketUrl: 'https://bmarutas.online'
 };

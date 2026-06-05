@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import {
   IonContent, IonHeader, IonToolbar,
-  IonTextarea, IonIcon
+  IonTextarea, IonIcon, AlertController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -38,6 +38,7 @@ interface ReporteHistorial {
 })
 export class ReportesComponent implements OnInit {
   private http = inject(HttpClient);
+  private alertCtrl = inject(AlertController);
 
   public vistaActual = signal<'nuevo' | 'historial'>('nuevo');
   public tipoSeleccionado = signal('');
@@ -85,6 +86,16 @@ export class ReportesComponent implements OnInit {
 
   ngOnInit() {}
 
+  async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertCtrl.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['Entendido'],
+      mode: 'ios'
+    });
+    await alert.present();
+  }
+
   cambiarVista(vista: 'nuevo' | 'historial') {
     this.vistaActual.set(vista);
   }
@@ -108,7 +119,7 @@ export class ReportesComponent implements OnInit {
         const sizeInMb = sizeInBytes / (1024 * 1024);
 
         if (sizeInMb > 5) {
-          alert('La imagen es demasiado grande. El límite es de 5MB.');
+          this.mostrarAlerta('📸 Archivo muy pesado', 'La foto seleccionada supera el límite de 5MB. Por favor, intenta capturar otra imagen.');
           return;
         }
 
@@ -129,15 +140,15 @@ export class ReportesComponent implements OnInit {
         (position) => {
           this.latitud = position.coords.latitude;
           this.longitud = position.coords.longitude;
-          alert('Ubicación GPS capturada con éxito');
+          this.mostrarAlerta('📍 Ubicación Georreferenciada', '¡Excelente! Hemos capturado tu ubicación GPS actual para adjuntarla al reporte.');
         },
         (error) => {
           console.warn('Error al obtener ubicación:', error);
-          alert('No se pudo acceder al GPS');
+          this.mostrarAlerta('🛰️ Señal GPS no disponible', 'No logramos acceder a tu ubicación exacta. Asegúrate de tener activo el GPS y otorgar permisos de localización.');
         }
       );
     } else {
-      alert('Geolocalización no soportada por el dispositivo');
+      this.mostrarAlerta('⚠️ No compatible', 'Tu dispositivo no cuenta con soporte nativo para geolocalización.');
     }
   }
 

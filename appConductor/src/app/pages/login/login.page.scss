@@ -1,86 +1,79 @@
 ion-content {
-  --background: var(--bg-main); // Fondo principal
+  --background: var(--bg-main);
 }
 
 .login-wrapper {
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
+  background: var(--bg-main);
 }
 
-/* =========================================
-   HERO CON IMAGEN (50% superior)
-   ========================================= */
 .hero-section {
   position: relative;
-  flex: 1 1 50%; // Toma la mitad superior de la pantalla
+  flex: 1 1 50%;
   min-height: 45vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; 
+  justify-content: flex-end;
 
   .hero-img {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     z-index: 0;
   }
 
-  // Degradado suave y extendido
   .hero-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--bg-main) 0%, transparent) 10%,
-      color-mix(in srgb, var(--bg-main) 40%, transparent) 50%,
-      color-mix(in srgb, var(--bg-main) 85%, transparent) 80%,
+      color-mix(in srgb, var(--bg-main) 8%, transparent) 10%,
+      color-mix(in srgb, var(--bg-main) 48%, transparent) 52%,
+      color-mix(in srgb, var(--bg-main) 88%, transparent) 82%,
       var(--bg-main) 100%
     );
     z-index: 1;
   }
 
-  // Título centrado en el límite de la imagen como en la referencia
   .welcome-title {
     position: relative;
     z-index: 2;
     text-align: center;
-    color: #ffffff; /* keep white for hero title */
+    color: var(--text-main);
     font-family: 'Peace Sans', sans-serif;
     font-size: 38px;
     font-weight: 400;
-    margin: 0 0 20px 0;
+    margin: 0 0 20px;
     letter-spacing: 1px;
   }
 }
 
-/* =========================================
-   FORMULARIO EN LA MITAD INFERIOR
-   ========================================= */
 .form-card {
   flex: 0 0 auto;
   padding: 10px 24px 48px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: var(--bg-main); // Fundido invisible con el overlay superior
+  background: var(--bg-main);
   z-index: 2;
 
   .input-group {
     .dark-input {
-      --background: var(--border-color);
+      --background: var(--bg-card);
       --border-radius: 20px;
-      border-radius: 20px;
       --padding-start: 16px;
       --inner-padding-end: 8px;
       --color: var(--text-main);
       --placeholder-color: var(--text-sec);
-      --min-height: 60px; // Inputs más altos para touch
+      --min-height: 60px;
       border: 1px solid var(--border-color);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 
       ion-icon[slot="start"] {
         color: var(--text-sec);
@@ -95,18 +88,17 @@ ion-content {
     }
   }
 
-  // Botón principal redondeado estilo pastilla
   .main-btn {
     --background: var(--primary);
-    --background-activated: #0ea5e9;
-    --color: #FFFFFF;
+    --background-activated: #7fa1dc;
+    --color: var(--bg-main);
     --border-radius: 30px;
+    --box-shadow: 0 8px 20px rgba(150, 180, 234, 0.24);
     height: 60px;
     font-size: 18px;
     font-weight: 400;
     font-family: 'Peace Sans', sans-serif;
     margin-top: 16px;
-    --box-shadow: 0 8px 20px rgba(150, 180, 234, 0.25);
   }
 
   .help-text {

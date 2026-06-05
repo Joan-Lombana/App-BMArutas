@@ -337,3 +337,67 @@
 
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeInDown { to { opacity: 1; transform: translateY(0); } }
+
+.routes-carousel {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 4px 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+
+  .route-card-stitch {
+    scroll-snap-align: center;
+    margin-bottom: 0 !important;
+  }
+}
+
+// ✨ OPCIÓN 3: Estilos para ruta principal
+.route-card-principal {
+  box-shadow: 0 4px 16px rgba(150, 180, 234, 0.12);
+  
+  &:hover {
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+  }
+  
+  .route-title {
+    background: linear-gradient(135deg, var(--primary), rgba(150, 180, 234, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+// ✨ Carrusel de rutas secundarias compactas
+.routes-carousel-secondary {
+  // Estilos base ya aplicados inline
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+  
+  .route-card-mini {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: var(--primary) !important;
+      background: rgba(150, 180, 234, 0.05);
+      transform: translateY(-2px);
+    }
+    
+    h3 {
+      margin: 12px 0 8px 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+  }
+}

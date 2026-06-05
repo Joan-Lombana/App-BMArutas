@@ -1,7 +1,7 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, DestroyRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, DestroyRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonFab, IonFabButton, IonIcon, IonModal, NavController, ToastController, AlertController } from '@ionic/angular/standalone';
+import { IonContent, IonFab, IonFabButton, IonIcon, NavController, ToastController, AlertController, Platform } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -41,12 +41,11 @@ interface Parada {
   templateUrl: './mi-ruta.page.html',
   styleUrls: ['./mi-ruta.page.scss'],
   standalone: true,
-  imports: [IonContent, IonFab, IonFabButton, IonIcon, IonModal, CommonModule, FormsModule]
+  imports: [IonContent, IonFab, IonFabButton, IonIcon, CommonModule, FormsModule]
 })
 export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
-  @ViewChild(IonModal) ionModal!: IonModal;
 
   private rutaService = inject(RutaService);
   private navCtrl = inject(NavController);
@@ -55,6 +54,9 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   private auth = inject(Auth);
   private ws = inject(WebSocketService);
   private destroyRef = inject(DestroyRef);
+  private platform = inject(Platform);
+
+  private backButtonSubscription?: any;
 
   // Estado del mapa
   map!: L.Map;
@@ -64,7 +66,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   rutaCargada: Ruta | null = null;
 
   // Estado de la UI y tracking
-  modalAbierto = false;
+  panelAbierto = signal(true);
   cargandoRuta = true;
   recorridoActivo = false;
   recorridoIdActual: string | null = null;
@@ -84,13 +86,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   private timerInterval: any = null;
   private ultimoEnvioPosicion = 0;
 
-  // Lista de paradas fijas (temporal)
-  paradaEjemplo: Parada[] = [
-    { coords: [3.8855, -77.0270], nombre: 'Punto de Inicio', barrio: 'El Centro' },
-    { coords: [3.8810, -77.0295], nombre: 'Parada 2', barrio: 'Barrio Obrero' },
-    { coords: [3.8765, -77.0335], nombre: 'Parada 3', barrio: 'Alfonso López' },
-    { coords: [3.8720, -77.0380], nombre: 'Punto Final', barrio: 'El Porvenir' },
-  ];
 
   // Estado de la cámara
   tomandoFoto = false;
@@ -118,13 +113,27 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     this.cargarRecorridoAsignado();
   }
 
+  ionViewDidEnter() {
+    // Interceptar botón atrás físico/sistema
+    this.backButtonSubscription = this.platform.backButton.subscribeWithPriority(10, () => {
+      this.goBack();
+    });
+    if (this.map) {
+      setTimeout(() => {
+        this.map?.invalidateSize();
+      }, 150);
+    }
+  }
+
   ionViewWillLeave() {
-    // Cuando navega atrás, destruimos el modal para que no se sobreponga
-    this.modalAbierto = false;
+    if (this.backButtonSubscription) {
+      this.backButtonSubscription.unsubscribe();
+    }
+    this.panelAbierto.set(false);
   }
 
   async ngAfterViewInit() {
-    const MIN_LOADING_MS = 4000; // Mínimo tiempo que se ve el globo
+    const MIN_LOADING_MS = 1000; // Mínimo tiempo que se ve el globo
     const inicio = Date.now();
 
     this.cargarRecorridoAsignado(() => {
@@ -135,15 +144,13 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         this.cargandoRuta = false;
         this.initMap();
         this.setupGeolocation();
-        this.modalAbierto = true;
-        setTimeout(() => this.ionModal?.setCurrentBreakpoint(0.15), 3200);
+        this.panelAbierto.set(true);
       }, remaining);
     }, () => {
       this.cargandoRuta = false;
-      this.modalAbierto = true;
+      this.panelAbierto.set(true);
       this.initMap();
       this.setupGeolocation();
-      setTimeout(() => this.ionModal?.setCurrentBreakpoint(0.15), 1200);
     });
   }
 
@@ -165,7 +172,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
           this.recorridoIdActual = nuevoId;
           this.rutaCargada = resultado.ruta ?? null;
           this.recorridoActivo = resultado.recorrido?.estado === 'Activa';
-          
+
           if (this.recorridoActivo || resultado.recorrido?.estado === 'Pausado') {
             // Si ya estaba activo o pausado, le ponemos un tiempo inicio temporal para que no desaparezca la UI
             if (!this.tiempoInicio) this.tiempoInicio = new Date();
@@ -193,6 +200,9 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.backButtonSubscription) {
+      this.backButtonSubscription.unsubscribe();
+    }
     const conductorId = this.auth.currentUser()?.id;
     if (conductorId) this.ws.salirConductor(conductorId);
     if (this.recorridoIdActual) this.ws.salirRecorrido(this.recorridoIdActual);
@@ -215,7 +225,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    console.log('🗺 Shape recibido:', JSON.stringify(this.rutaCargada?.shape));
+    console.log(' Shape recibido:', JSON.stringify(this.rutaCargada?.shape));
 
     // Extraer coordenadas segun el tipo de geometria
     let rawCoords: number[][] = [];
@@ -258,7 +268,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.routePolyline = L.polyline(leafletCoords, {
-      color: '#00E5FF',
+      color: '#96B4EA',
       weight: 5,
       opacity: 0.9,
       lineJoin: 'round'
@@ -304,30 +314,54 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     try {
       // 1. Verificar si ya tenemos permisos antes de pedir
       let perms = await Geolocation.checkPermissions();
-      
+
       if (perms.location !== 'granted') {
         perms = await Geolocation.requestPermissions();
       }
 
       if (perms.location !== 'granted') {
-        this.mostrarToast('Permiso de ubicación denegado. Usando modo offline.');
+        const alertPermisos = await this.alertCtrl.create({
+          header: 'Permiso de ubicación requerido',
+          message: 'BMArutas necesita acceso a tu ubicación en tiempo real para rastrear la ruta de recolección. Por favor, concede los permisos de ubicación en los ajustes de tu dispositivo.',
+          buttons: ['Entendido'],
+          mode: 'ios'
+        });
+        await alertPermisos.present();
         this.usarPosicionFallback();
         return;
       }
 
       // 2. Obtener posición inicial con Timeout para no quedarse colgado
-      const pos = await Geolocation.getCurrentPosition({ 
-        enableHighAccuracy: true, 
-        timeout: 10000 
-      });
+      let pos;
+      try {
+        pos = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000
+        });
+      } catch (err: any) {
+        console.error('Error en getCurrentPosition:', err);
+        const alertGps = await this.alertCtrl.create({
+          header: 'Ubicación desactivada',
+          message: 'No pudimos acceder al GPS. Asegúrate de tener encendido el servicio de ubicación (GPS) en la configuración rápida de tu dispositivo.',
+          buttons: ['Entendido'],
+          mode: 'ios'
+        });
+        await alertGps.present();
+        this.usarPosicionFallback();
+        return;
+      }
+
       this.posicionActual = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       this.actualizarMarcadorConductor(pos.coords.latitude, pos.coords.longitude);
 
       // 3. Seguimiento en tiempo real
       this.watchId = await Geolocation.watchPosition(
         { enableHighAccuracy: true, timeout: 10000 },
-        (position, err) => {
-          if (err) { console.error('Error en watchPosition:', err); return; }
+        async (position, err) => {
+          if (err) {
+            console.error('Error en watchPosition:', err);
+            return;
+          }
           if (position) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
@@ -349,8 +383,14 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         }
       );
     } catch (e) {
-      console.error('Error obteniendo ubicación inicial:', e);
-      this.mostrarToast('No se pudo obtener el GPS. Asegúrate de tener la ubicación encendida.');
+      console.error('Error obteniendo ubicación:', e);
+      const alertError = await this.alertCtrl.create({
+        header: 'Error de ubicación',
+        message: 'Ocurrió un error inesperado al intentar acceder al GPS de tu dispositivo.',
+        buttons: ['Entendido'],
+        mode: 'ios'
+      });
+      await alertError.present();
       this.usarPosicionFallback();
     }
   }
@@ -371,7 +411,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     // Lógica para guiar hacia el inicio de la ruta si está lejos
     if (this.inicioRutaLatLng && !this.recorridoActivo) {
       this.distanciaAlInicio = currentLatLng.distanceTo(this.inicioRutaLatLng);
-      
+
       // Si está a más de 80 metros, trazar ruta hacia el inicio
       if (this.distanciaAlInicio > 80) {
         this.trazarRutaHaciaInicio(currentLatLng, this.inicioRutaLatLng);
@@ -395,7 +435,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     const ahora = Date.now();
     // Actualizar solo cada 15 segundos para no saturar OSRM
     if (this.rutaHaciaInicio && (ahora - this.ultimaActualizacionRutaHaciaInicio < 15000)) {
-       return;
+      return;
     }
     this.ultimaActualizacionRutaHaciaInicio = ahora;
 
@@ -425,10 +465,10 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       // Fallback: linea recta si falla OSRM
       if (!this.rutaHaciaInicio) {
         this.rutaHaciaInicio = L.polyline([origen, destino], {
-            color: '#6366f1',
-            weight: 5,
-            dashArray: '10, 10',
-            opacity: 0.8
+          color: '#6366f1',
+          weight: 5,
+          dashArray: '10, 10',
+          opacity: 0.8
         }).addTo(this.map);
       } else {
         this.rutaHaciaInicio.setLatLngs([origen, destino]);
@@ -451,16 +491,12 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     await toast.present();
   }
 
-  // Acciones y controles de la interfaz
-  async goBack() {
-    // 1. Liberamos el bloqueo anti-cierre del modal
-    this.ionModal.canDismiss = true;
-    
-    // 2. Cerramos el modal de forma nativa y esperamos a que desaparezca por completo del DOM
-    await this.ionModal.dismiss();
-    
-    // 3. Una vez limpio, regresamos a la pantalla anterior sin dejar "zombis"
+  goBack() {
     this.navCtrl.back();
+  }
+
+  togglePanel() {
+    this.panelAbierto.update(v => !v);
   }
 
   centrarEnConductor() {
@@ -499,11 +535,11 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
             if (this.posicionActual) {
               this.emitirPosicionActual(this.posicionActual.lat, this.posicionActual.lng);
             }
-            this.mostrarToast('Recorrido iniciado. Transmitiendo ubicación en tiempo real.');
+            this.mostrarToast('🚀 ¡Recorrido en marcha! Transmitiendo tu ubicación en tiempo real.');
           },
           error: (err) => {
             console.warn('⚠️ Aviso al iniciar:', err?.error?.message || err.message);
-            this.mostrarToast('Transmitiendo ubicación.');
+            this.mostrarToast('📡 Transmisión de ubicación activada.');
           }
         });
         // Iniciar contador de tiempo si es la primera vez o reanudar
@@ -533,7 +569,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         this.tiempoAcumulado = Date.now() - this.tiempoInicio.getTime();
       }
       if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
-      
+
       if (this.recorridoIdActual) {
         this.rutaService.pausarRecorrido(this.recorridoIdActual).subscribe({
           next: () => console.log('⏸️ Recorrido pausado en backend'),
@@ -541,7 +577,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         });
       }
 
-      this.mostrarToast('Transmisión pausada.');
+      this.mostrarToast('⏸️ Transmisión pausada. Tu ubicación ya no se compartirá.');
     }
   }
 
@@ -549,17 +585,17 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     if (!this.recorridoIdActual) return;
 
     const alert = await this.alertCtrl.create({
-      header: 'Finalizar Recorrido',
-      message: '¿Estás seguro de que deseas finalizar el recorrido? Esta acción no se puede deshacer.',
+      header: '🏁 ¿Finalizar Recorrido?',
+      message: '¿Estás seguro de que deseas terminar tu turno en esta ruta? Se detendrá el envío de tu ubicación en tiempo real.',
       cssClass: 'confirm-alert',
       buttons: [
         {
-          text: 'Cancelar',
+          text: 'No, continuar',
           role: 'cancel',
           cssClass: 'alert-btn-cancel'
         },
         {
-          text: 'Finalizar',
+          text: 'Sí, finalizar',
           cssClass: 'alert-btn-confirm',
           handler: () => {
             if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
@@ -568,7 +604,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
             this.rutaService.finalizarRecorrido(this.recorridoIdActual!).subscribe({
               next: () => {
                 console.log('Recorrido finalizado:', this.recorridoIdActual);
-                this.mostrarToast('Recorrido finalizado exitosamente.');
+                this.mostrarToast('✅ ¡Recorrido finalizado con éxito! Buen trabajo.');
                 this.recorridoIdActual = null;
                 this.tiempoInicio = null;
                 this.tiempoAcumulado = 0;
@@ -577,7 +613,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
               },
               error: (err) => {
                 console.warn('Error al finalizar:', err?.error?.message || err.message);
-                this.mostrarToast('Recorrido marcado como finalizado localmente.');
+                this.mostrarToast('🏁 Recorrido finalizado de forma local.');
                 this.tiempoInicio = null;
                 this.tiempoAcumulado = 0;
               }
@@ -595,11 +631,11 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   // ============================================================
   async tomarFoto() {
     if (!this.recorridoIdActual) {
-      this.mostrarToast('Debes tener un recorrido activo para tomar una foto.');
+      this.mostrarToast('⚠️ Debes iniciar el recorrido antes de tomar una foto.');
       return;
     }
     if (!this.posicionActual) {
-      this.mostrarToast('Esperando señal GPS para georreferenciar la foto...');
+      this.mostrarToast('📡 Esperando señal GPS estable para registrar el punto de la foto...');
       return;
     }
 
@@ -618,7 +654,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       const posicionId: string | null = respPosicion?.id ?? respPosicion?.posicion_id ?? null;
 
       if (!posicionId) {
-        this.mostrarToast('No se pudo registrar la posición. Intenta de nuevo.');
+        this.mostrarToast('⚠️ No se pudo registrar la posición en el mapa. Intenta de nuevo.');
         this.tomandoFoto = false;
         return;
       }
@@ -636,31 +672,27 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       });
 
       if (!foto.base64String) {
-        this.mostrarToast('No se capturó la imagen correctamente.');
+        this.mostrarToast('⚠️ La foto no se guardó correctamente. Vuelve a intentarlo.');
         this.tomandoFoto = false;
         return;
       }
 
       const imagenBase64 = `data:image/jpeg;base64,${foto.base64String}`;
 
-      // 2.5️⃣ Comprimir imagen para cumplir con límite de 5MB de la API externa
-      const imagenComprimida = await this.comprimirImagen(imagenBase64, 512, 0.85);
-
       // 3️⃣ Subir la foto vinculada a la posición recién creada
-      this.rutaService.subirFotoPosicion(posicionId, imagenComprimida).subscribe({
+      this.rutaService.subirFotoPosicion(posicionId, imagenBase64).subscribe({
         next: (resp) => {
           if (resp?.status === 'success') {
             console.log('📷 Foto subida exitosamente:', resp);
-            this.mostrarToast('📷 Foto registrada y vinculada al recorrido.');
+            this.mostrarToast('📸 ¡Foto vinculada con éxito al reporte de ruta!');
           } else {
-            this.mostrarToast('No se pudo confirmar la subida de la foto.');
+            this.mostrarToast('⚠️ No se recibió confirmación del servidor al subir la foto.');
           }
           this.tomandoFoto = false;
         },
         error: (err) => {
           console.error('❌ Error al subir foto:', err);
-          const mensaje = err?.error?.message || 'Error al subir la foto. Verifica la conexión e intenta de nuevo.';
-          this.mostrarToast('⚠️ ' + mensaje);
+          this.mostrarToast('❌ Error de conexión al subir la foto. Verifica tu red e intenta de nuevo.');
           this.tomandoFoto = false;
         }
       });
@@ -669,40 +701,10 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       // El usuario canceló la cámara u ocurrió un error
       if (e?.message !== 'User cancelled photos app') {
         console.error('Error abriendo cámara:', e);
-        this.mostrarToast('No se pudo abrir la cámara.');
+        this.mostrarToast('📷 No se pudo acceder a la cámara.');
       }
       this.tomandoFoto = false;
     }
-  }
-
-  /**
-   * Redimensiona y comprime una imagen base64 para cumplir con el límite de 5MB.
-   * El lado mayor no superará maxLado px, preservando la proporción.
-   */
-  private comprimirImagen(base64: string, maxLado: number, calidad: number): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        const ladoMayor = Math.max(width, height);
-
-        if (ladoMayor > maxLado) {
-          const ratio = maxLado / ladoMayor;
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, 0, 0, width, height);
-
-        resolve(canvas.toDataURL('image/jpeg', calidad));
-      };
-      img.onerror = () => reject(new Error('Error al cargar imagen para compresión'));
-      img.src = base64;
-    });
   }
 }
 

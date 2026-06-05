@@ -2,110 +2,98 @@
 
   <!-- LOADING: Globo girando -->
   @if (cargandoRuta) {
-    <div class="map-loading">
-      <div class="globe-container">
-        <span class="globe-emoji">🌎</span>
-      </div>
-      <div class="loading-text">
-        <span class="loading-title">Localizando tu ruta</span>
-        <span class="loading-sub">Conectando con el servidor...</span>
-      </div>
-      <div class="loading-bar-bg">
-        <div class="loading-bar-fill"></div>
-      </div>
+  <div class="map-loading">
+    <div class="globe-container">
+      <span class="globe-emoji">🌎</span>
     </div>
+    <div class="loading-text">
+      <span class="loading-title">Localizando tu ruta</span>
+      <span class="loading-sub">Conectando con el servidor...</span>
+    </div>
+    <div class="loading-bar-bg">
+      <div class="loading-bar-fill"></div>
+    </div>
+  </div>
   }
   <div class="map-wrapper" #mapContainer></div>
 
   <!-- BOTÓN FLOTANTE REGRESAR (FAB) -->
   @if (!cargandoRuta) {
-    <ion-fab vertical="top" horizontal="start" slot="fixed" class="back-fab">
-      <ion-fab-button class="glass-fab" (click)="goBack()">
-        <ion-icon name="arrow-back-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+  <ion-fab vertical="top" horizontal="start" slot="fixed" class="back-fab">
+    <ion-fab-button class="glass-fab" (click)="goBack()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
   }
 
-  <!-- BOTÓN FLOTANTE UBICACIÓN (FAB) -->
+  <!-- BOTÓN FLOTANTE (CUANDO EL PANEL ESTÁ CERRADO) -->
+  @if (!cargandoRuta && !panelAbierto()) {
+  <div class="minimal-pill-container fade-in-up">
+    <button class="minimal-pill" (click)="togglePanel()">
+      <ion-icon name="map-outline"></ion-icon>
+      <span>{{ rutaCargada?.nombre_ruta || 'Mi Ruta' }}</span>
+      <ion-icon name="chevron-up-outline" class="pill-arrow"></ion-icon>
+    </button>
+  </div>
+  }
+
+  <!-- BOTTOM SHEET CUSTOM -->
   @if (!cargandoRuta) {
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="location-fab">
-      <ion-fab-button class="glass-fab" (click)="centrarEnConductor()">
-        <ion-icon name="locate"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
-  }
+  <div class="bottom-sheet" [class.collapsed]="!panelAbierto()">
 
-  <!-- BOTTOM SHEET -->
-  <ion-modal
-    class="bottom-sheet-modal"
-    [isOpen]="modalAbierto"
-    [canDismiss]="false"
-    [initialBreakpoint]="0.15"
-    [breakpoints]="[0.15, 0.4, 0.75]"
-    [backdropDismiss]="false"
-    [backdropBreakpoint]="1"
-    handle="true">
-    <ng-template>
-      <ion-content class="bottom-sheet-content stitch-sheet">
+    <div class="sheet-handle-zone" (click)="togglePanel()">
+      <div class="sheet-handle"></div>
+    </div>
 
-        <!-- Encabezado: nombre de la ruta + badge de estado -->
-        <div class="sheet-header">
-          <div class="route-info">
-            <span class="route-label">RUTA ASIGNADA</span>
-            <h2 class="route-name">{{ rutaCargada?.nombre_ruta || 'Sin ruta asignada' }}</h2>
-          </div>
-          <div class="status-badge" [class.badge-active]="recorridoActivo" [class.badge-idle]="!recorridoActivo">
-            <span class="badge-dot"></span>
-            {{ recorridoActivo ? 'EN VIVO' : (recorridoIdActual ? (tiempoInicio ? 'PAUSADO' : 'LISTO') : 'SIN ASIGNAR') }}
-          </div>
+    <div class="sheet-content stitch-sheet">
+      <!-- Encabezado: nombre de la ruta + badge de estado -->
+      <div class="sheet-header">
+        <div class="route-info">
+          <span class="route-label">RUTA ASIGNADA</span>
+          <h2 class="route-name">{{ rutaCargada?.nombre_ruta || 'Sin ruta asignada' }}</h2>
         </div>
+        <div class="status-badge" [class.badge-active]="recorridoActivo" [class.badge-idle]="!recorridoActivo"
+          (click)="togglePanel()">
+          <span class="badge-dot"></span>
+          {{ recorridoActivo ? 'EN VIVO' : (recorridoIdActual ? (tiempoInicio ? 'PAUSADO' : 'LISTO') : 'SIN ASIGNAR') }}
+          <ion-icon name="chevron-down-outline" style="margin-left: 6px; font-size: 14px; cursor: pointer;"></ion-icon>
+        </div>
+      </div>
 
-        <!-- Métricas en tiempo real (visibles si está activo o pausado) -->
-        @if (recorridoActivo || tiempoInicio) {
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <ion-icon name="timer-outline"></ion-icon>
-              <span class="metric-val">{{ tiempoTranscurrido }}</span>
-              <span class="metric-label">Tiempo</span>
-            </div>
-            <div class="metric-card">
-              <ion-icon name="radio-outline"></ion-icon>
-              <span class="metric-val">{{ posicionesenviadas }}</span>
-              <span class="metric-label">Posiciones</span>
-            </div>
-            @if (posicionActual) {
-              <div class="metric-card">
-                <ion-icon name="location-outline"></ion-icon>
-                <span class="metric-val gps-val">{{ posicionActual.lat | number:'1.4-4' }}</span>
-                <span class="metric-label">Latitud</span>
-              </div>
-            }
-            @if (posicionActual) {
-              <div class="metric-card">
-                <ion-icon name="navigate-outline"></ion-icon>
-                <span class="metric-val gps-val">{{ posicionActual.lng | number:'1.4-4' }}</span>
-                <span class="metric-label">Longitud</span>
-              </div>
-            }
-          </div>
+      <!-- Métricas en tiempo real (visibles si está activo o pausado) -->
+      @if (recorridoActivo || tiempoInicio) {
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <ion-icon name="timer-outline"></ion-icon>
+          <span class="metric-val">{{ tiempoTranscurrido }}</span>
+          <span class="metric-label">Tiempo</span>
+        </div>
+        <div class="metric-card">
+          <ion-icon name="radio-outline"></ion-icon>
+          <span class="metric-val">{{ posicionesenviadas }}</span>
+          <span class="metric-label">Posiciones</span>
+        </div>
+      </div>
+      }
+
+      <!-- Estado cuando NO ha iniciado -->
+      @if (!recorridoActivo && !tiempoInicio) {
+      <div class="idle-info">
+        <ion-icon name="map-outline" class="idle-icon"></ion-icon>
+        @if (recorridoIdActual) {
+        <p>Presiona <strong>INICIAR</strong> para comenzar a transmitir tu ubicación en tiempo real.</p>
         }
-
-        <!-- Estado cuando NO ha iniciado -->
-        @if (!recorridoActivo && !tiempoInicio) {
-          <div class="idle-info">
-            <ion-icon name="map-outline" class="idle-icon"></ion-icon>
-            @if (recorridoIdActual) {
-              <p>Presiona <strong>INICIAR</strong> para comenzar a transmitir tu ubicación en tiempo real.</p>
-            }
-            @if (!recorridoIdActual) {
-              <p>No tienes ningún recorrido asignado. Contacta al administrador.</p>
-            }
-          </div>
+        @if (!recorridoIdActual) {
+        <p>No tienes ningún recorrido asignado. Contacta al administrador.</p>
         }
+      </div>
+      }
 
-        <!-- Botones de acción -->
-        <div class="actions-row-stitch">
-          <button class="btn-check" (click)="toggleRecorrido()" [disabled]="!recorridoIdActual" [ngClass]="{'btn-paused': !recorridoActivo && tiempoInicio}">
+      <!-- Botones de acción organizados en cuadrícula -->
+      <div class="actions-container">
+        <div class="actions-row">
+          <button class="btn-check" (click)="toggleRecorrido()" [disabled]="!recorridoIdActual"
+            [ngClass]="{'btn-paused': !recorridoActivo && tiempoInicio}">
             <ion-icon [name]="recorridoActivo ? 'pause-circle' : 'play-circle'"></ion-icon>
             {{ recorridoActivo ? 'PAUSAR' : (tiempoInicio ? 'REANUDAR' : 'INICIAR') }}
           </button>
@@ -115,33 +103,26 @@
           </button>
         </div>
 
-        <!-- Botón TOMAR FOTO (visible cuando hay recorrido asignado) -->
         @if (recorridoIdActual) {
-          <button
-            class="btn-foto"
-            [disabled]="tomandoFoto"
-            (click)="tomarFoto()">
+        <div class="actions-row">
+          <button class="btn-foto" [disabled]="tomandoFoto" (click)="tomarFoto()">
             @if (tomandoFoto) {
-              <span class="spinner-sm"></span> Procesando...
+            <span class="spinner-sm"></span> PROCESANDO...
             } @else {
-              <ion-icon name="camera-outline"></ion-icon>
-              TOMAR FOTO
+            <ion-icon name="camera-outline"></ion-icon>
+            TOMAR FOTO
             }
           </button>
-        }
 
-        <!-- Botón FINALIZAR (solo cuando hay recorrido asignado) -->
-        @if (recorridoIdActual) {
-          <button
-            class="btn-finalizar"
-            (click)="confirmarFinalizar()">
+          <button class="btn-finalizar" (click)="confirmarFinalizar()">
             <ion-icon name="stop-circle-outline"></ion-icon>
-            FINALIZAR RECORRIDO
+            FINALIZAR
           </button>
+        </div>
         }
+      </div>
 
-
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+    </div>
+  </div>
+  }
 </ion-content>

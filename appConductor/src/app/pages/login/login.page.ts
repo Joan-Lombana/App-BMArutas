@@ -8,7 +8,8 @@ import {
   IonIcon,
   IonInput,
   IonItem,
-  IonSpinner
+  IonSpinner,
+  AlertController
 } from '@ionic/angular/standalone';
 
 import { RouterModule, Router } from '@angular/router';
@@ -42,6 +43,7 @@ import { Auth } from '../../services/auth';
 export class LoginPage implements OnInit {
 
   private auth = inject(Auth);
+  private alertCtrl = inject(AlertController);
 
   verContrasena = false;
   cargando = false;
@@ -63,6 +65,16 @@ export class LoginPage implements OnInit {
     this.verContrasena = !this.verContrasena;
   }
 
+  async mostrarAlerta(titulo: string, mensaje: string) {
+    const alert = await this.alertCtrl.create({
+      header: titulo,
+      message: mensaje,
+      buttons: ['Entendido'],
+      mode: 'ios'
+    });
+    await alert.present();
+  }
+
   // ============================
   // LOGIN REAL
   // ============================
@@ -70,7 +82,7 @@ export class LoginPage implements OnInit {
   iniciarSesion() {
 
     if (!this.correo || !this.contrasena) {
-      alert('Ingrese correo y contraseña');
+      this.mostrarAlerta('Campos vacíos', 'Por favor, ingresa tu correo electrónico y tu contraseña para continuar.');
       return;
     }
 
@@ -100,7 +112,7 @@ export class LoginPage implements OnInit {
 
         } else {
 
-          alert(`No autorizado. Rol recibido: ${rol}`);
+          this.mostrarAlerta('Acceso denegado', `No tienes permisos de conductor asignados para ingresar.`);
           this.auth.logout();
 
         }
@@ -113,14 +125,14 @@ export class LoginPage implements OnInit {
         
         let msg = '';
         if (err.status === 0) {
-          msg = `Red: Error 0. Backend apagado o bloqueado. (${err.message})`;
+          msg = 'No pudimos conectarnos al servidor de BMArutas. Verifica tu conexión a internet o intenta de nuevo en unos momentos.';
         } else if (err.status === 401) {
-          msg = 'Credenciales incorrectas (401). Verifica el correo y la contraseña en la base de datos.';
+          msg = 'Correo electrónico o contraseña incorrectos. Por favor, verifica tus datos.';
         } else {
-          msg = `Error ${err.status}: ${err.error?.message || err.message}`;
+          msg = err.error?.message || 'No se pudo iniciar sesión. Ocurrió un error inesperado en el servidor.';
         }
         
-        alert(msg);
+        this.mostrarAlerta('Error al iniciar sesión', msg);
       }
 
     });
@@ -128,3 +140,4 @@ export class LoginPage implements OnInit {
   }
 
 }
+

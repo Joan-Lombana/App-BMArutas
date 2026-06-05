@@ -24,45 +24,60 @@
       <ion-icon name="notifications-outline" class="notif-icon"></ion-icon>
     </div>
 
-    <!-- TÍTULO Y FECHA -->
+    <!-- TÍTULO Y FECHA SELECTOR -->
     <div class="title-section">
-      <h1>Rutas Asignadas</h1>
-      <!-- TODO: fecha dinámica desde el sistema -->
-      <p class="fecha">{{ fechaHoy }}</p>
+      <h1>Historial de Rutas</h1>
+      
+      <!-- ✨ Selector de Fecha -->
+      <div class="date-selector-container" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; background: var(--bg-card); border-radius: 16px; padding: 12px;">
+        <button (click)="irFechaAnterior()" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 24px; padding: 4px;">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        
+        <span style="flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-main);">
+          {{ fechaFormateada }}
+        </span>
+        
+        <button (click)="irFechaSiguiente()" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 24px; padding: 4px;">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
     </div>
 
-    <!-- ESTADO VACÍO (cuando aún no hay datos del backend) -->
+    <!-- ESTADO VACÍO (cuando no hay rutas completadas para esa fecha) -->
     @if (rutas.length === 0) {
       <div class="empty-state">
         <div class="empty-icon">
           <ion-icon name="map-outline"></ion-icon>
         </div>
-        <p class="empty-title">Sin rutas asignadas</p>
-        <p class="empty-sub">Las rutas asignadas por el administrador aparecerán aquí.</p>
+        <p class="empty-title">Sin rutas completadas</p>
+        <p class="empty-sub">No hay rutas finalizadas en esta fecha. Selecciona otra fecha para ver el historial.</p>
       </div>
     }
 
     <!-- LISTA DE RUTAS (se muestra cuando el backend devuelva datos) -->
     @if (rutas.length > 0) {
+      <div class="section-row">
+        <span class="section-label">RUTAS COMPLETADAS</span>
+        <span class="route-count">{{ rutas.length }} {{ rutas.length === 1 ? 'ruta' : 'rutas' }}</span>
+      </div>
       <div class="rutas-list">
         @for (ruta of rutas; track ruta) {
           <div
             class="ruta-card"
-            [class]="'ruta-card--' + ruta.estado"
+            [class.ruta-card--finalizada]="ruta.estado === 'finalizada'"
             (click)="verRuta(ruta)"
             >
             <!-- Fila superior: código + estado -->
             <div class="card-top-row">
               <div class="card-codigo-group">
-                <span class="label-small">CÓDIGO</span>
+                <span class="label-small">RUTA</span>
                 <!-- TODO: viene del backend → ruta.codigo -->
                 <span class="codigo">{{ ruta.codigo }}</span>
               </div>
-              <div class="estado-badge" [class]="'badge--' + ruta.estado">
-                @if (ruta.estado === 'activa') {
-                  <span class="dot-green"></span>
-                }
-                {{ getEstadoLabel(ruta.estado) }}
+              <div class="estado-badge badge--finalizada">
+                <span class="dot-green"></span>
+                COMPLETADA
               </div>
             </div>
             <!-- Zona de operación -->
@@ -76,30 +91,11 @@
                 <!-- TODO: viene del backend → ruta.horarioInicio y ruta.horarioFin -->
                 <span>{{ ruta.horarioInicio }} - {{ ruta.horarioFin }}</span>
               </div>
-              <!-- Botón continuar si está activa -->
-              @if (ruta.estado === 'activa') {
-                <button
-                  class="btn-continuar"
-                  (click)="$event.stopPropagation(); continuarRuta(ruta)"
-                  routerLink="/tabs/manifest"
-                  >
-                  CONTINUAR
-                </button>
-              }
-              <!-- Flecha si está asignada -->
-              @if (ruta.estado === 'asignada') {
-                <ion-icon
-                  name="chevron-forward-outline"
-                  class="arrow-icon"
-                ></ion-icon>
-              }
-              <!-- Check si está finalizada -->
-              @if (ruta.estado === 'finalizada') {
-                <ion-icon
-                  name="checkmark-circle"
-                  class="check-icon"
-                ></ion-icon>
-              }
+              <!-- Ícono de check para finalizada -->
+              <ion-icon
+                name="checkmark-circle"
+                class="check-icon"
+              ></ion-icon>
             </div>
           </div>
         }

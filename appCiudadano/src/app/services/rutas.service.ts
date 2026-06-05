@@ -9,6 +9,7 @@ export interface RutaResponse {
   nombre_ruta: string;
   descripcion?: string;
   color?: string;
+  color_hex?: string;
   activa?: boolean;
   paradas?: number;
   frecuencia?: string;
@@ -28,10 +29,24 @@ export class RutasService {
   constructor() { }
 
   obtenerRutas(): Observable<RutaResponse[]> {
-    return this.http.get<RutaResponse[] | { data?: RutaResponse[]; rutas?: RutaResponse[]; results?: RutaResponse[] }>(this.apiUrl)
-      .pipe(map((resp) => {
-        if (Array.isArray(resp)) return resp;
-        return resp.data ?? resp.rutas ?? resp.results ?? [];
-      }));
+    return this.http.get<any>(this.apiUrl)
+      .pipe(map((resp) => this.extraerLista(resp)));
+  }
+
+  private extraerLista(resp: any): RutaResponse[] {
+    if (Array.isArray(resp)) return resp;
+
+    const candidatos = [
+      resp?.data,
+      resp?.rutas,
+      resp?.results,
+      resp?.value,
+      resp?.data?.data,
+      resp?.data?.rutas,
+      resp?.data?.results,
+      resp?.data?.value,
+    ];
+
+    return candidatos.find(Array.isArray) ?? [];
   }
 }

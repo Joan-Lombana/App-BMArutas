@@ -85,6 +85,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   tiempoTranscurrido = '00:00:00';
   private timerInterval: any = null;
   private ultimoEnvioPosicion = 0;
+  private ultimaPosicionActualizada: { lat: number; lng: number } | null = null; // ✨ Para filtrar actualizaciones
 
 
   // Estado de la cámara
@@ -365,7 +366,23 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
           if (position) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
-            this.posicionActual = { lat, lng }; // Guarda para mostrar en UI
+            const newPos = { lat, lng };
+
+            // ✨ FILTRO DE DISTANCIA MÍNIMA: solo actualizar si se movió >10 metros
+            if (this.ultimaPosicionActualizada) {
+              const distancia = Math.sqrt(
+                Math.pow((lat - this.ultimaPosicionActualizada.lat) * 111320, 2) +
+                Math.pow((lng - this.ultimaPosicionActualizada.lng) * 111320 * Math.cos((lat * Math.PI) / 180), 2)
+              );
+              
+              if (distancia < 10) {
+                // Ignorar actualización si está a menos de 10 metros
+                return;
+              }
+            }
+
+            this.ultimaPosicionActualizada = newPos;
+            this.posicionActual = newPos; // Guarda para mostrar en UI
             this.actualizarMarcadorConductor(lat, lng);
 
             if (this.recorridoActivo) {

@@ -4,6 +4,7 @@ import { Network, ConnectionStatus } from '@capacitor/network';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Auth } from './auth';
+import { firstValueFrom } from 'rxjs';
 
 export interface PosicionPendiente {
   recorridoId: string;
@@ -95,12 +96,14 @@ export class OfflineService {
       // Como el backend actual espera un POST por posición, podemos enviarlas iterando 
       // o adaptar el backend a un endpoint '/sync'. Por ahora, mandamos al mismo endpoint:
       for (const pos of pendientes) {
-        await this.http.post(`${apiUrl}/recorridos/${pos.recorridoId}/posiciones`, {
-          latitud: pos.lat,
-          longitud: pos.lng,
-          velocidad: 0,
-          timestamp: pos.timestamp // BMAR-XXX: El backend debe leer este campo para no usar la hora de llegada
-        }, this.auth.getAuthHeaders()).toPromise();
+        await firstValueFrom(
+          this.http.post(`${apiUrl}/recorridos/${pos.recorridoId}/posiciones`, {
+            latitud: pos.lat,
+            longitud: pos.lng,
+            velocidad: 0,
+            timestamp: pos.timestamp
+          }, this.auth.getAuthHeaders())
+        );
       }
 
       // Si todo salió bien, vaciamos la base de datos local

@@ -1,19 +1,28 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, DestroyRef, signal } from '@angular/core';
+import {
+  Component, OnInit, ElementRef, ViewChild,
+  AfterViewInit, OnDestroy, DestroyRef, signal, inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonFab, IonFabButton, IonIcon, NavController, ToastController, AlertController, Platform } from '@ionic/angular/standalone';
+import {
+  IonContent, IonFab, IonFabButton, IonIcon,
+  NavController, ToastController, AlertController, Platform
+} from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { addIcons } from 'ionicons';
-import { locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline, cameraOutline } from 'ionicons/icons';
+import {
+  locate, busOutline, timerOutline, checkmarkCircle, pauseCircle,
+  arrowBackOutline, radioOutline, mapOutline, playCircle,
+  locationOutline, navigateOutline, stopCircleOutline, cameraOutline
+} from 'ionicons/icons';
 import { RutaService, Ruta } from '../../services/ruta.service';
 import { Auth } from '../../services/auth';
 import { WebSocketService } from '../../services/websocket.service';
-import { inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { OfflineService } from '../../services/offline.service';
 
-// Marcador personalizado estilo Google Maps para el conductor
 const conductorIcon = L.divIcon({
   html: `
     <div class="location-marker-wrapper">
@@ -28,8 +37,6 @@ const conductorIcon = L.divIcon({
   popupAnchor: [0, -20]
 });
 
-
-// Estructura de las paradas de la ruta
 interface Parada {
   coords: [number, number];
   nombre: string;
@@ -55,57 +62,53 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   private ws = inject(WebSocketService);
   private destroyRef = inject(DestroyRef);
   private platform = inject(Platform);
+  private offlineService = inject(OfflineService);
 
   private backButtonSubscription?: any;
 
-  // Estado del mapa
   map!: L.Map;
   conductorMarker!: L.Marker;
   routePolyline!: L.Polyline;
   watchId: string | null = null;
   rutaCargada: Ruta | null = null;
 
-  // Estado de la UI y tracking
   panelAbierto = signal(true);
   cargandoRuta = true;
   recorridoActivo = false;
   recorridoIdActual: string | null = null;
 
-  // Guía hacia el inicio
   inicioRutaLatLng: L.LatLng | null = null;
   rutaHaciaInicio: L.Polyline | null = null;
   distanciaAlInicio = 0;
   private ultimaActualizacionRutaHaciaInicio = 0;
 
-  // Datos GPS en tiempo real
   posicionActual: { lat: number; lng: number } | null = null;
   posicionesenviadas = 0;
   tiempoInicio: Date | null = null;
   tiempoAcumulado = 0;
   tiempoTranscurrido = '00:00:00';
   private timerInterval: any = null;
-  private ultimoEnvioPosicion = 0;
   private ultimaPosicionActualizada: { lat: number; lng: number } | null = null;
   private ultimaPosicionEnviada: { lat: number; lng: number; ts: number } | null = null;
-
-  /** Filtros GPS: trazo continuo al caminar, sin racimos por jitter */
   private readonly GPS_MIN_METROS = 5;
   private readonly GPS_MAX_ACCURACY_M = 30;
 
-  
-
-
-  // Estado de la cámara
   tomandoFoto = false;
   ultimaPosicionId: string | null = null;
 
+  // FIX #5: Flag para evitar doble carga al entrar por primera vez
+  private rutaYaCargada = false;
+
   constructor() {
-    addIcons({ locate, busOutline, timerOutline, checkmarkCircle, pauseCircle, arrowBackOutline, radioOutline, mapOutline, playCircle, locationOutline, navigateOutline, stopCircleOutline, cameraOutline });
+    addIcons({
+      locate, busOutline, timerOutline, checkmarkCircle, pauseCircle,
+      arrowBackOutline, radioOutline, mapOutline, playCircle,
+      locationOutline, navigateOutline, stopCircleOutline, cameraOutline
+    });
   }
 
   ngOnInit() {
     const conductorId = this.auth.currentUser()?.id;
-
     if (conductorId) {
       this.ws.unirseConductor(conductorId);
     }
@@ -118,18 +121,17 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ionViewWillEnter() {
+    // FIX #5: La primera carga la hace ngAfterViewInit, aquí solo recargamos en visitas posteriores
+    if (!this.rutaYaCargada) return;
     this.cargarRecorridoAsignado();
   }
 
   ionViewDidEnter() {
-    // Interceptar botón atrás físico/sistema
     this.backButtonSubscription = this.platform.backButton.subscribeWithPriority(10, () => {
       this.goBack();
     });
     if (this.map) {
-      setTimeout(() => {
-        this.map?.invalidateSize();
-      }, 150);
+      setTimeout(() => this.map?.invalidateSize(), 150);
     }
   }
 
@@ -138,43 +140,51 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       this.backButtonSubscription.unsubscribe();
     }
     this.panelAbierto.set(false);
+
+    // FIX #6: Pausar el timer al salir para no consumir CPU innecesariamente
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+      // Guardar acumulado para reanudar correctamente al volver
+      if (this.tiempoInicio) {
+        this.tiempoAcumulado = Date.now() - this.tiempoInicio.getTime();
+        this.tiempoInicio = null;
+      }
+    }
+  }
+
+  ionViewDidEnterAfterLeave() {
+    // Reanudar timer si el recorrido seguía activo al volver
+    if (this.recorridoActivo && !this.timerInterval) {
+      this.tiempoInicio = new Date(Date.now() - this.tiempoAcumulado);
+      this.iniciarTimer();
+    }
   }
 
   async ngAfterViewInit() {
-    const MIN_LOADING_MS = 1000; // Mínimo tiempo que se ve el globo
+    const MIN_LOADING_MS = 1000;
     const inicio = Date.now();
+
+    // FIX #5: Marcar que la primera carga ya ocurrió aquí
+    this.rutaYaCargada = true;
 
     this.cargarRecorridoAsignado(() => {
       const elapsed = Date.now() - inicio;
       const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
 
       setTimeout(() => {
-    this.cargandoRuta = false;
+        this.cargandoRuta = false;
+        if (!this.map) this.initMap();
+        if (!this.watchId) this.setupGeolocation();
+        this.panelAbierto.set(true);
+      }, remaining);
 
-    if (!this.map) {
-      this.initMap();
-    }
-
-    if (!this.watchId) {
-      this.setupGeolocation();
-    }
-
-    this.panelAbierto.set(true);
-  }, remaining);
-
-  }, () => {
-    this.cargandoRuta = false;
-
-    if (!this.map) {
-      this.initMap();
-    }
-
-    if (!this.watchId) {
-      this.setupGeolocation();
-    }
-
-    this.panelAbierto.set(true);
-  });
+    }, () => {
+      this.cargandoRuta = false;
+      if (!this.map) this.initMap();
+      if (!this.watchId) this.setupGeolocation();
+      this.panelAbierto.set(true);
+    });
   }
 
   private cargarRecorridoAsignado(onSuccess?: () => void, onError?: () => void) {
@@ -197,19 +207,14 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
           this.recorridoActivo = resultado.recorrido?.estado === 'Activa';
 
           if (this.recorridoActivo || resultado.recorrido?.estado === 'Pausado') {
-            // Si ya estaba activo o pausado, le ponemos un tiempo inicio temporal para que no desaparezca la UI
             if (!this.tiempoInicio) this.tiempoInicio = new Date();
           }
-
-          console.log('✅ Recorrido asignado:', this.recorridoIdActual, '| Ruta:', this.rutaCargada?.nombre_ruta, '| Estado:', resultado.recorrido?.estado);
         } else {
           if (recorridoAnterior) {
             this.ws.salirRecorrido(recorridoAnterior);
           }
-
           this.recorridoIdActual = null;
           this.rutaCargada = null;
-          console.warn('⚠️ No hay recorrido asignado a este conductor.');
         }
 
         onSuccess?.();
@@ -234,23 +239,17 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     if (this.map) this.map.remove();
   }
 
-  // Configuración e inicialización del mapa de Leaflet
   initMap() {
     const centerFallback: [number, number] = [3.8801, -77.0312];
 
-    // Normalizar shape (puede venir como string JSON)
     if (this.rutaCargada?.shape && typeof this.rutaCargada.shape === 'string') {
       try {
         (this.rutaCargada as any).shape = JSON.parse(this.rutaCargada.shape as any);
       } catch (e) {
-        console.warn('⚠️ No se pudo parsear el shape');
         (this.rutaCargada as any).shape = null;
       }
     }
 
-    console.log(' Shape recibido:', JSON.stringify(this.rutaCargada?.shape));
-
-    // Extraer coordenadas segun el tipo de geometria
     let rawCoords: number[][] = [];
     const shape = this.rutaCargada?.shape as any;
     if (shape?.type === 'LineString' && Array.isArray(shape.coordinates)) {
@@ -260,8 +259,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     } else if (Array.isArray(shape?.coordinates)) {
       rawCoords = shape.coordinates;
     }
-
-    console.log('📍 Coordenadas extraidas:', rawCoords.length);
 
     const tieneShape = rawCoords.length > 0;
     const leafletCoords = tieneShape ? this.rutaService.geoJsonALeaflet(rawCoords) : [];
@@ -284,9 +281,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     }).addTo(this.map);
 
     if (!tieneShape) {
-      [300, 800, 1500].forEach(ms =>
-        setTimeout(() => this.map?.invalidateSize(), ms)
-      );
+      [300, 800, 1500].forEach(ms => setTimeout(() => this.map?.invalidateSize(), ms));
       return;
     }
 
@@ -310,29 +305,19 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     }).addTo(this.map)
       .bindPopup('<b>Fin de ruta</b>');
 
-    // Fly-to animado: primero muestra la ruta completa, luego vuela al inicio
     setTimeout(() => this.map?.invalidateSize(), 300);
     setTimeout(() => {
       if (this.routePolyline) {
-        // Paso 1: muestra toda la ruta
         this.map.fitBounds(this.routePolyline.getBounds(), {
-          padding: [60, 60],
-          animate: true,
-          duration: 1.2
+          padding: [60, 60], animate: true, duration: 1.2
         });
       }
     }, 500);
     setTimeout(() => {
-      // Paso 2: vuela al punto de inicio con zoom más cercano
-      this.map.flyTo(leafletCoords[0], 16, {
-        animate: true,
-        duration: 1.8,
-        easeLinearity: 0.3
-      });
+      this.map.flyTo(leafletCoords[0], 16, { animate: true, duration: 1.8, easeLinearity: 0.3 });
     }, 2200);
   }
 
-  /** Distancia Haversine en metros entre dos coordenadas */
   private distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371000;
     const toRad = (d: number) => (d * Math.PI) / 180;
@@ -344,77 +329,46 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  /**
-   * Descarta lecturas con mala precisión, micro-movimientos o saltos imposibles (GPS jitter).
-   */
   private debeAceptarLecturaGps(
-  lat: number,
-  lng: number,
-  accuracy: number | null | undefined,
-  ts: number,
-): boolean {
-
-  if (accuracy != null && accuracy > this.GPS_MAX_ACCURACY_M) {
-    return false;
+    lat: number, lng: number,
+    accuracy: number | null | undefined,
+    ts: number
+  ): boolean {
+    if (accuracy != null && accuracy > this.GPS_MAX_ACCURACY_M) return false;
+    const ref = this.ultimaPosicionEnviada;
+    if (!ref) return true;
+    return this.distanciaMetros(lat, lng, ref.lat, ref.lng) >= this.GPS_MIN_METROS;
   }
 
-  const ref = this.ultimaPosicionEnviada;
-
-  if (!ref) {
-    return true;
-  }
-
-  const dist = this.distanciaMetros(
-    lat,
-    lng,
-    ref.lat,
-    ref.lng
-  );
-
-  return dist >= this.GPS_MIN_METROS;
-}
-
-  
   private procesarLecturaGps(
-  lat: number,
-  lng: number,
-  accuracy: number | null | undefined,
-  ts: number,
-  enviarAlServidor: boolean,
-) {
-  if (!this.debeAceptarLecturaGps(lat, lng, accuracy, ts)) {
-    return;
-  }
+    lat: number, lng: number,
+    accuracy: number | null | undefined,
+    ts: number,
+    enviarAlServidor: boolean
+  ) {
+    if (!this.debeAceptarLecturaGps(lat, lng, accuracy, ts)) return;
 
-  this.ultimaPosicionActualizada = { lat, lng };
-  this.posicionActual = { lat, lng };
-  this.actualizarMarcadorConductor(lat, lng);
+    this.ultimaPosicionActualizada = { lat, lng };
+    this.posicionActual = { lat, lng };
+    this.actualizarMarcadorConductor(lat, lng);
 
-  if (!enviarAlServidor || !this.recorridoActivo || !this.recorridoIdActual) {
-    return;
-  }
+    if (!enviarAlServidor || !this.recorridoActivo || !this.recorridoIdActual) return;
 
-  let debeEnviar = false;
+    let debeEnviar = false;
+    if (!this.ultimaPosicionEnviada) {
+      debeEnviar = true;
+    } else {
+      const distancia = this.distanciaMetros(lat, lng, this.ultimaPosicionEnviada.lat, this.ultimaPosicionEnviada.lng);
+      debeEnviar = distancia >= this.GPS_MIN_METROS;
+    }
 
-  if (!this.ultimaPosicionEnviada) {
-    debeEnviar = true;
-  } else {
-    const distancia = this.distanciaMetros(
-      lat, lng,
-      this.ultimaPosicionEnviada.lat,
-      this.ultimaPosicionEnviada.lng
-    );
-    debeEnviar = distancia >= this.GPS_MIN_METROS;
-  }
+    if (!debeEnviar) return;
 
-  if (!debeEnviar) return;
+    // Guardar posición anterior para revertir si falla el HTTP
+    const posicionAnterior = this.ultimaPosicionEnviada;
+    this.ultimaPosicionEnviada = { lat, lng, ts };
 
-  // ✅ Marcar ANTES de enviar para no duplicar, pero guardar ref por si falla
-  const posicionAnterior = this.ultimaPosicionEnviada;
-  this.ultimaPosicionEnviada = { lat, lng, ts };
-
-  // ✅ Emitir por WebSocket inmediatamente (tiempo real sin esperar HTTP)
-  if (this.recorridoIdActual) {
+    // FIX: Emitir por WebSocket inmediatamente (tiempo real)
     this.ws.emitirPosicion({
       id: crypto.randomUUID(),
       recorridoId: this.recorridoIdActual,
@@ -423,34 +377,31 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       timestamp: ts,
       velocidad: 0,
     });
-  }
 
-  // ✅ Enviar por HTTP también (persistencia en BD)
-  this.rutaService.enviarPosicion(
-    this.recorridoIdActual,
-    lat,
-    lng
-  ).subscribe({
-    next: () => {
-      this.posicionesenviadas++;
-    },
-    error: (err) => {
-      console.error('⚠️ Error enviando posición', err);
-      // ❌ Si falla el HTTP, revertir para que la próxima lectura lo reintente
-      // Solo revertir si no hubo otra posición más nueva entre tanto
-      if (this.ultimaPosicionEnviada?.ts === ts) {
-        this.ultimaPosicionEnviada = posicionAnterior;
+    // Enviar por HTTP (persistencia en BD)
+    this.rutaService.enviarPosicion(this.recorridoIdActual, lat, lng).subscribe({
+      next: () => {
+        this.posicionesenviadas++;
+      },
+      error: (err) => {
+        console.error('⚠️ Error enviando posición', err);
+        // Revertir el filtro para que la próxima lectura reintente
+        if (this.ultimaPosicionEnviada?.ts === ts) {
+          this.ultimaPosicionEnviada = posicionAnterior;
+        }
+        // ✅ Guardar en cola offline para no perder la posición
+        if (this.recorridoIdActual) {
+          this.offlineService.guardarPosicionPendiente(
+            this.recorridoIdActual, lat, lng
+          );
+        }
       }
-    }
-  });
-}
-
+    });
+  }
 
   async setupGeolocation() {
     try {
-      // 1. Verificar si ya tenemos permisos antes de pedir
       let perms = await Geolocation.checkPermissions();
-
       if (perms.location !== 'granted') {
         perms = await Geolocation.requestPermissions();
       }
@@ -458,7 +409,7 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       if (perms.location !== 'granted') {
         const alertPermisos = await this.alertCtrl.create({
           header: 'Permiso de ubicación requerido',
-          message: 'BMArutas necesita acceso a tu ubicación en tiempo real para rastrear la ruta de recolección. Por favor, concede los permisos de ubicación en los ajustes de tu dispositivo.',
+          message: 'BMArutas necesita acceso a tu ubicación en tiempo real para rastrear la ruta.',
           buttons: ['Entendido'],
           mode: 'ios'
         });
@@ -467,18 +418,13 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      // 2. Obtener posición inicial con Timeout para no quedarse colgado
       let pos;
       try {
-        pos = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 10000
-        });
+        pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 10000 });
       } catch (err: any) {
-        console.error('Error en getCurrentPosition:', err);
         const alertGps = await this.alertCtrl.create({
           header: 'Ubicación desactivada',
-          message: 'No pudimos acceder al GPS. Asegúrate de tener encendido el servicio de ubicación (GPS) en la configuración rápida de tu dispositivo.',
+          message: 'No pudimos acceder al GPS. Asegúrate de tener encendido el servicio de ubicación.',
           buttons: ['Entendido'],
           mode: 'ios'
         });
@@ -489,37 +435,27 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
       const lat0 = pos.coords.latitude;
       const lng0 = pos.coords.longitude;
-      const ts0 = pos.timestamp || Date.now();
       this.ultimaPosicionActualizada = { lat: lat0, lng: lng0 };
       this.posicionActual = { lat: lat0, lng: lng0 };
       this.actualizarMarcadorConductor(lat0, lng0);
 
-      // 3. Seguimiento en tiempo real (con filtros anti-jitter)
       this.watchId = await Geolocation.watchPosition(
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 },
         (position, err) => {
-          if (err) {
-            console.error('Error en watchPosition:', err);
-            return;
-          }
-          if (!position) {
-            return;
-          }
-
+          if (err || !position) return;
           this.procesarLecturaGps(
             position.coords.latitude,
             position.coords.longitude,
             position.coords.accuracy,
             position.timestamp || Date.now(),
-            true,
+            true
           );
-        },
+        }
       );
     } catch (e) {
-      console.error('Error obteniendo ubicación:', e);
       const alertError = await this.alertCtrl.create({
         header: 'Error de ubicación',
-        message: 'Ocurrió un error inesperado al intentar acceder al GPS de tu dispositivo.',
+        message: 'Ocurrió un error inesperado al intentar acceder al GPS.',
         buttons: ['Entendido'],
         mode: 'ios'
       });
@@ -527,9 +463,9 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       this.usarPosicionFallback();
     }
   }
+
   actualizarMarcadorConductor(lat: number, lng: number) {
     if (!this.map) return;
-
     const currentLatLng = L.latLng(lat, lng);
 
     if (!this.conductorMarker) {
@@ -540,15 +476,11 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       this.conductorMarker.setLatLng(currentLatLng);
     }
 
-    // Lógica para guiar hacia el inicio de la ruta si está lejos
     if (this.inicioRutaLatLng && !this.recorridoActivo) {
       this.distanciaAlInicio = currentLatLng.distanceTo(this.inicioRutaLatLng);
-
-      // Si está a más de 80 metros, trazar ruta hacia el inicio
       if (this.distanciaAlInicio > 80) {
         this.trazarRutaHaciaInicio(currentLatLng, this.inicioRutaLatLng);
       } else {
-        // Ya llegó al inicio
         if (this.rutaHaciaInicio) {
           this.rutaHaciaInicio.remove();
           this.rutaHaciaInicio = null;
@@ -556,7 +488,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     } else if (this.recorridoActivo && this.rutaHaciaInicio) {
-      // Si ya inició el recorrido, quitamos la guía
       this.rutaHaciaInicio.remove();
       this.rutaHaciaInicio = null;
     }
@@ -565,42 +496,29 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
   async trazarRutaHaciaInicio(origen: L.LatLng, destino: L.LatLng) {
     if (!this.map) return;
     const ahora = Date.now();
-    // Actualizar solo cada 15 segundos para no saturar OSRM
-    if (this.rutaHaciaInicio && (ahora - this.ultimaActualizacionRutaHaciaInicio < 15000)) {
-      return;
-    }
+    if (this.rutaHaciaInicio && (ahora - this.ultimaActualizacionRutaHaciaInicio < 15000)) return;
     this.ultimaActualizacionRutaHaciaInicio = ahora;
 
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${origen.lng},${origen.lat};${destino.lng},${destino.lat}?overview=full&geometries=geojson`;
       const res = await fetch(url);
       const data = await res.json();
-      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      if (data.code === 'Ok' && data.routes?.length > 0) {
         const coords = data.routes[0].geometry.coordinates;
         const leafletCoords = coords.map((c: number[]) => [c[1], c[0]] as [number, number]);
-
         if (this.rutaHaciaInicio) {
           this.rutaHaciaInicio.setLatLngs(leafletCoords);
         } else {
           this.rutaHaciaInicio = L.polyline(leafletCoords, {
-            color: '#6366f1', // Indigo
-            weight: 5,
-            dashArray: '10, 10', // Línea punteada
-            opacity: 0.9,
-            lineJoin: 'round'
+            color: '#6366f1', weight: 5, dashArray: '10, 10', opacity: 0.9, lineJoin: 'round'
           }).addTo(this.map);
           this.rutaHaciaInicio.bindPopup('Camino hacia el inicio de la ruta');
         }
       }
     } catch (e) {
-      console.error('Error fetching OSRM route:', e);
-      // Fallback: linea recta si falla OSRM
       if (!this.rutaHaciaInicio) {
         this.rutaHaciaInicio = L.polyline([origen, destino], {
-          color: '#6366f1',
-          weight: 5,
-          dashArray: '10, 10',
-          opacity: 0.8
+          color: '#6366f1', weight: 5, dashArray: '10, 10', opacity: 0.8
         }).addTo(this.map);
       } else {
         this.rutaHaciaInicio.setLatLngs([origen, destino]);
@@ -608,35 +526,25 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Posición de fallback
   usarPosicionFallback() {
     this.actualizarMarcadorConductor(3.8801, -77.0312);
   }
 
   async mostrarToast(mensaje: string) {
     const toast = await this.toastCtrl.create({
-      message: mensaje,
-      duration: 3000,
-      position: 'top',
-      color: 'dark'
+      message: mensaje, duration: 3000, position: 'top', color: 'dark'
     });
     await toast.present();
   }
 
-  goBack() {
-    this.navCtrl.back();
-  }
-
-  togglePanel() {
-    this.panelAbierto.update(v => !v);
-  }
+  goBack() { this.navCtrl.back(); }
+  togglePanel() { this.panelAbierto.update(v => !v); }
 
   centrarEnConductor() {
     if (this.conductorMarker) {
       this.map.setView(this.conductorMarker.getLatLng(), 17, { animate: true });
       const pos = this.conductorMarker.getLatLng();
       this.posicionActual = { lat: pos.lat, lng: pos.lng };
-
       if (this.recorridoActivo) {
         this.emitirPosicionActual(pos.lat, pos.lng);
       }
@@ -645,38 +553,47 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  /** Envía posición al servidor respetando los mismos filtros GPS (salvo inicio de recorrido). */
   private emitirPosicionActual(lat: number, lng: number, forzar = false) {
-  if (!this.recorridoIdActual) return;
+    if (!this.recorridoIdActual) return;
 
-  const ts = Date.now();
-  if (!forzar && !this.debeAceptarLecturaGps(lat, lng, null, ts)) {
-    return;
-  }
+    const ts = Date.now();
+    if (!forzar && !this.debeAceptarLecturaGps(lat, lng, null, ts)) return;
 
-  const posicionAnterior = this.ultimaPosicionEnviada;
-  this.ultimaPosicionEnviada = { lat, lng, ts };
+    const posicionAnterior = this.ultimaPosicionEnviada;
+    this.ultimaPosicionEnviada = { lat, lng, ts };
 
-  // ✅ WebSocket también aquí
-  this.ws.emitirPosicion({
-    id: crypto.randomUUID(),
-    recorridoId: this.recorridoIdActual,
-    latitud: lat,
-    longitud: lng,
-    timestamp: ts,
-    velocidad: 0,
-  });
+    // FIX: WebSocket también en el botón MI POSICIÓN
+    this.ws.emitirPosicion({
+      id: crypto.randomUUID(),
+      recorridoId: this.recorridoIdActual,
+      latitud: lat,
+      longitud: lng,
+      timestamp: ts,
+      velocidad: 0,
+    });
 
-  this.rutaService.enviarPosicion(this.recorridoIdActual, lat, lng).subscribe({
-    next: () => { this.posicionesenviadas++; },
-    error: (err) => {
-      console.error('⚠️ Error enviando posición', err);
+    this.rutaService.enviarPosicion(this.recorridoIdActual, lat, lng).subscribe({
+      next: () => { this.posicionesenviadas++; },
+      error: (err) => {
       if (this.ultimaPosicionEnviada?.ts === ts) {
         this.ultimaPosicionEnviada = posicionAnterior;
       }
-    },
-  });
-}
+      },
+        });
+  }
+
+  // FIX #6: Timer extraído a método reutilizable
+  private iniciarTimer() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => {
+      if (!this.tiempoInicio) return;
+      const diff = Date.now() - this.tiempoInicio.getTime();
+      const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+      const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+      const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+      this.tiempoTranscurrido = `${h}:${m}:${s}`;
+    }, 1000);
+  }
 
   async toggleRecorrido() {
     this.recorridoActivo = !this.recorridoActivo;
@@ -685,7 +602,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       if (this.recorridoIdActual) {
         this.rutaService.iniciarRecorrido(this.recorridoIdActual).subscribe({
           next: () => {
-            console.log('▶️ Recorrido iniciado en backend:', this.recorridoIdActual);
             if (this.posicionActual) {
               this.emitirPosicionActual(this.posicionActual.lat, this.posicionActual.lng, true);
             }
@@ -696,23 +612,16 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
             this.mostrarToast('📡 Transmisión de ubicación activada.');
           }
         });
-        // Iniciar contador de tiempo si es la primera vez o reanudar
+
         if (!this.tiempoInicio || this.tiempoAcumulado === 0) {
           this.tiempoInicio = new Date();
           this.posicionesenviadas = 0;
         } else {
-          // Reanudar ajustando el tiempo de inicio
           this.tiempoInicio = new Date(Date.now() - this.tiempoAcumulado);
         }
 
-        this.timerInterval = setInterval(() => {
-          if (!this.tiempoInicio) return;
-          const diff = Date.now() - this.tiempoInicio.getTime();
-          const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-          const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-          const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-          this.tiempoTranscurrido = `${h}:${m}:${s}`;
-        }, 1000);
+        this.iniciarTimer(); // FIX: usar método centralizado
+
       } else {
         this.mostrarToast('No tienes un recorrido asignado. Contacta al administrador.');
         this.recorridoActivo = false;
@@ -740,14 +649,10 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
     const alert = await this.alertCtrl.create({
       header: '🏁 ¿Finalizar Recorrido?',
-      message: '¿Estás seguro de que deseas terminar tu turno en esta ruta? Se detendrá el envío de tu ubicación en tiempo real.',
+      message: '¿Estás seguro de que deseas terminar tu turno en esta ruta?',
       cssClass: 'confirm-alert',
       buttons: [
-        {
-          text: 'No, continuar',
-          role: 'cancel',
-          cssClass: 'alert-btn-cancel'
-        },
+        { text: 'No, continuar', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: 'Sí, finalizar',
           cssClass: 'alert-btn-confirm',
@@ -757,7 +662,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
             this.rutaService.finalizarRecorrido(this.recorridoIdActual!).subscribe({
               next: () => {
-                console.log('Recorrido finalizado:', this.recorridoIdActual);
                 this.mostrarToast('✅ ¡Recorrido finalizado con éxito! Buen trabajo.');
                 this.recorridoIdActual = null;
                 this.tiempoInicio = null;
@@ -780,9 +684,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     await alert.present();
   }
 
-  // ============================================================
-  // TOMAR Y SUBIR FOTO (Flujo de 2 pasos según guía técnica)
-  // ============================================================
   async tomarFoto() {
     if (!this.recorridoIdActual) {
       this.mostrarToast('⚠️ Debes iniciar el recorrido antes de tomar una foto.');
@@ -796,7 +697,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
     this.tomandoFoto = true;
 
     try {
-      // 1️⃣ Registrar la posición actual en el backend y capturar el posicion_id
       const respPosicion: any = await new Promise((resolve, reject) => {
         this.rutaService.enviarPosicion(
           this.recorridoIdActual!,
@@ -815,7 +715,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
       this.ultimaPosicionId = posicionId;
 
-      // 2️⃣ Abrir la cámara con Capacitor Camera
       const foto = await Camera.getPhoto({
         quality: 80,
         allowEditing: false,
@@ -833,11 +732,9 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
 
       const imagenBase64 = `data:image/jpeg;base64,${foto.base64String}`;
 
-      // 3️⃣ Subir la foto vinculada a la posición recién creada
       this.rutaService.subirFotoPosicion(posicionId, imagenBase64).subscribe({
         next: (resp) => {
           if (resp?.status === 'success') {
-            console.log('📷 Foto subida exitosamente:', resp);
             this.mostrarToast('📸 ¡Foto vinculada con éxito al reporte de ruta!');
           } else {
             this.mostrarToast('⚠️ No se recibió confirmación del servidor al subir la foto.');
@@ -852,7 +749,6 @@ export class MiRutaPage implements OnInit, AfterViewInit, OnDestroy {
       });
 
     } catch (e: any) {
-      // El usuario canceló la cámara u ocurrió un error
       if (e?.message !== 'User cancelled photos app') {
         console.error('Error abriendo cámara:', e);
         this.mostrarToast('📷 No se pudo acceder a la cámara.');

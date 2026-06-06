@@ -231,34 +231,26 @@ export class RutaService {
    * Envía la posición actual del conductor al backend.
    * Si no hay internet, la guarda localmente mediante el OfflineService.
    */
-  enviarPosicion(recorridoId: string, lat: number, lng: number): Observable<any> {
-    return from(this.offlineService.checkConexionActiva()).pipe(
-      switchMap(hayConexion => {
-        if (!hayConexion) {
-          // Guardar localmente y devolver un Observable vacío/exitoso simulado
-          this.offlineService.guardarPosicionPendiente(recorridoId, lat, lng);
-          return of({ status: 'offline_queued' });
-        }
-
-        // Si hay conexión, enviar directamente con timestamp real
-        const payload = {
-          latitud: lat,
-          longitud: lng,
-          velocidad: 0,
-          timestamp: Date.now() // BMAR-XXX: Importante enviar el timestamp
-        };
-        
-        return this.http.post(`${this.apiUrl}/recorridos/${recorridoId}/posiciones`, payload, this.auth.getAuthHeaders()).pipe(
-          catchError(err => {
-            // Si da error (ej. timeout o micro-corte), lo guardamos también
-            console.warn('Fallo al enviar posición, guardando en cola offline...', err);
-            this.offlineService.guardarPosicionPendiente(recorridoId, lat, lng);
-            return of({ status: 'error_queued' });
-          })
-        );
-      })
-    );
+   enviarPosicion(recorridoId: string, lat: number, lng: number): Observable<any> {
+  if (!this.offlineService.hayConexion) {
+    this.offlineService.guardarPosicionPendiente(recorridoId, lat, lng);
+    return of({ status: 'offline_queued' });
   }
+
+  const payload = { latitud: lat, longitud: lng, velocidad: 0, timestamp: Date.now() };
+
+  return this.http.post(
+    `${this.apiUrl}/recorridos/${recorridoId}/posiciones`,
+    payload,
+    this.auth.getAuthHeaders()
+  ).pipe(
+    catchError(err => {
+      // HTTP falló aunque había conexión → guardar en queue
+      this.offlineService.guardarPosicionPendiente(recorridoId, lat, lng);
+      return of({ status: 'error_queued' });
+    })
+  );
+}
 
   // =============================================
   // INCIDENCIAS (Pendiente Backend)
